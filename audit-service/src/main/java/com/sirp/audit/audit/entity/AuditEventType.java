@@ -1,0 +1,17 @@
+package com.sirp.audit.audit.entity;
+
+public enum AuditEventType {
+    INCIDENT_CREATED,
+    INCIDENT_UPDATED,
+    INCIDENT_ASSIGNED,
+    INCIDENT_RESOLVED,
+    INCIDENT_CLOSED,
+    USER_CREATED,
+    USER_UPDATED,
+    USER_DELETED,
+    LOGIN_SUCCESS,
+    LOGIN_FAILED,
+    PASSWORD_CHANGED,
+    ROLE_ASSIGNED,
+    ROLE_REMOVED
+}

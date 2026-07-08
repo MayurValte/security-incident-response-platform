@@ -1,0 +1,27 @@
+spring:
+
+  application:
+    name: audit-service
+
+  config:
+    import: optional:configserver:http://localhost:8888
+
+management:
+
+  endpoints:
+
+    web:
+
+      exposure:
+
+        include: health,info,prometheus
+
+server:
+
+  shutdown: graceful
+
+logging:
+
+  level:
+
+    root: INFO

@@ -1,0 +1,91 @@
+server:
+  port: 8084
+
+spring:
+
+  datasource:
+
+    url: jdbc:postgresql://localhost:5432/sirp_audit_db
+
+    username: postgres
+
+    password: root
+
+  jpa:
+
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+
+    properties:
+
+      hibernate:
+
+        format_sql: true
+
+  kafka:
+
+    bootstrap-servers:
+
+      localhost:29092
+
+    consumer:
+
+      group-id: audit-service
+
+      auto-offset-reset: earliest
+
+      key-deserializer:
+
+        org.apache.kafka.common.serialization.StringDeserializer
+
+      value-deserializer:
+
+        org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+
+        spring.json.trusted.packages: "*"
+
+  cloud:
+
+    consul:
+
+      host: localhost
+
+      port: 8500
+
+      discovery:
+
+        enabled: true
+
+        register: true
+
+        service-name: audit-service
+
+management:
+
+  endpoint:
+
+    health:
+
+      show-details: always
+
+  endpoints:
+
+    web:
+
+      exposure:
+
+        include: "*"
+
+springdoc:
+
+  swagger-ui:
+
+    path: /swagger-ui.html
+
+  api-docs:
+
+    path: /v3/api-docs
