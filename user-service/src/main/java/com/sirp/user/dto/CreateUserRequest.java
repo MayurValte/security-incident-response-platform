@@ -4,22 +4,24 @@ import com.sirp.user.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.UUID;
 
 public record CreateUserRequest(
 
-        @NotBlank
-        String username,
+    @NotBlank
+    String username,
 
-        @Email
-        String email,
+    @Email
+    String email,
 
-        @NotBlank
-        @Size(min = 8)
-        String password,
+    @NotBlank
+    @Size(min = 8)
+    String password,
 
-        Role role,
+    Role role,
 
-        Long teamId
+    UUID teamId
 
 ) {
+
 }

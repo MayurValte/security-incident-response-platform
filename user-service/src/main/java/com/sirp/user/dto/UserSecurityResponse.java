@@ -1,11 +1,14 @@
 package com.sirp.user.dto;
 
+import java.util.UUID;
+
 public record UserSecurityResponse(
-        Long id,
-        String username,
-        String email,
-        String password,
-        String role,
-        Boolean enabled
+    UUID id,
+    String username,
+    String email,
+    String password,
+    String role,
+    Boolean enabled
 ) {
+
 }

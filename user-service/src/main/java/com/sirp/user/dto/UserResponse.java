@@ -1,18 +1,20 @@
 package com.sirp.user.dto;
 
 import com.sirp.user.enums.Role;
+import java.util.UUID;
 
 public record UserResponse(
 
-        Long id,
+    UUID id,
 
-        String username,
+    String username,
 
-        String email,
+    String email,
 
-        Role role,
+    Role role,
 
-        String team
+    String team
 
 ) {
+
 }

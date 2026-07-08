@@ -1,5 +1,6 @@
 package com.sirp.user.mapper;
 
+import com.sirp.user.dto.UserNotificationResponse;
 import com.sirp.user.dto.UserResponse;
 import com.sirp.user.dto.UserSecurityResponse;
 import com.sirp.user.entity.User;
@@ -10,15 +11,17 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
     @Mapping(
-            target = "team",
-            source = "team.teamName"
+        target = "team",
+        source = "team.teamName"
     )
     UserResponse toDto(User user);
 
     @Mapping(
-            target = "role",
-            expression = "java(user.getRole().name())"
+        target = "role",
+        expression = "java(user.getRole().name())"
     )
     UserSecurityResponse toSecurityDto(User user);
+
+    UserNotificationResponse toNotificationDto(User user);
 
 }
