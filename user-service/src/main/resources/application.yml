@@ -1,0 +1,31 @@
+spring:
+
+  application:
+    name: user-service
+
+  config:
+    import: optional:configserver:http://localhost:8888
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sirp_user_db
+    username: postgres
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+
+  cloud:
+
+    consul:
+
+      host: localhost
+      port: 8500
+
+      discovery:
+        prefer-ip-address: true
+
+server:
+  port: 8081
