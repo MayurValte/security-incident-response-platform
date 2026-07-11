@@ -2,7 +2,7 @@ package com.sirp.workflow.repository;
 
 import com.sirp.common.enums.WorkflowStatus;
 import com.sirp.workflow.entity.WorkflowEntity;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +31,7 @@ public interface WorkflowRepository extends JpaRepository<WorkflowEntity, UUID> 
                                                           );
 
     List<WorkflowEntity> findByNextEscalationTimeBeforeAndWorkflowStatus(
-        LocalDateTime currentTime,
+        Instant currentTime,
         WorkflowStatus workflowStatus
                                                                         );
 

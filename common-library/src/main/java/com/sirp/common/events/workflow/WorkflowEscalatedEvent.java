@@ -5,6 +5,8 @@ import java.util.UUID;
 
 public record WorkflowEscalatedEvent(
 
+    UUID eventId,
+
     UUID workflowId,
 
     UUID incidentId,

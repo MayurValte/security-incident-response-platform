@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 public interface WorkflowMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "severity", source = "priority")
     @Mapping(target = "workflowStatus", constant = "CREATED")
     @Mapping(target = "escalationLevel", constant = "0")
     @Mapping(target = "resolvedAt", ignore = true)
@@ -18,6 +19,7 @@ public interface WorkflowMapper {
     @Mapping(target = "updatedAt", ignore = true)
     WorkflowEntity toEntity(CreateWorkflowRequest request);
 
+    @Mapping(target = "priority", source = "severity")
     WorkflowResponse toResponse(WorkflowEntity entity);
 
 }

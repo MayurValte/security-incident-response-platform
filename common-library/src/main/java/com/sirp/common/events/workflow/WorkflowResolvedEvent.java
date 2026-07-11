@@ -5,6 +5,8 @@ import java.util.UUID;
 
 public record WorkflowResolvedEvent(
 
+    UUID eventId,
+
     UUID workflowId,
 
     UUID incidentId,

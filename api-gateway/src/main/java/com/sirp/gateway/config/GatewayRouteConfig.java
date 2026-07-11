@@ -33,6 +33,8 @@ public class GatewayRouteConfig {
                 .uri("http://localhost:8081"))
             .route("incident-service", r -> r.path("/api/v1/incidents/**")
                 .uri("http://localhost:8083"))
+            .route("workflow-service", r -> r.path("/api/v1/workflows/**")
+                .uri("http://localhost:8086"))
             .route("playbook-service", r -> r.path("/api/v1/playbooks/**")
                 .uri("http://localhost:8084"))
             .route("reporting-service", r -> r.path("/api/v1/reports/**")

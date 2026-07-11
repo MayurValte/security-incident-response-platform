@@ -10,8 +10,15 @@ import com.sirp.common.events.IncidentAssignedEvent;
 import com.sirp.common.events.IncidentClosedEvent;
 import com.sirp.common.events.IncidentCreatedEvent;
 import com.sirp.common.events.IncidentResolvedEvent;
+import com.sirp.common.events.workflow.WorkflowAssignedEvent;
+import com.sirp.common.events.workflow.WorkflowClosedEvent;
+import com.sirp.common.events.workflow.WorkflowCreatedEvent;
+import com.sirp.common.events.workflow.WorkflowEscalatedEvent;
+import com.sirp.common.events.workflow.WorkflowResolvedEvent;
 import com.sirp.common.kafka.KafkaTopics;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +38,7 @@ public class AuditEventConsumer {
     persist(
         event.eventId(),
         event.incidentId(),
+        AggregateType.INCIDENT,
         AuditEventType.INCIDENT_CREATED,
         event.createdBy(),
         event.occurredAt(),
@@ -43,6 +51,7 @@ public class AuditEventConsumer {
     persist(
         event.eventId(),
         event.incidentId(),
+        AggregateType.INCIDENT,
         AuditEventType.INCIDENT_ASSIGNED,
         event.assignedBy(),
         event.occurredAt(),
@@ -55,6 +64,7 @@ public class AuditEventConsumer {
     persist(
         event.eventId(),
         event.incidentId(),
+        AggregateType.INCIDENT,
         AuditEventType.INCIDENT_RESOLVED,
         event.resolvedBy(),
         event.occurredAt(),
@@ -67,6 +77,7 @@ public class AuditEventConsumer {
     persist(
         event.eventId(),
         event.incidentId(),
+        AggregateType.INCIDENT,
         AuditEventType.INCIDENT_CLOSED,
         event.closedBy(),
         event.occurredAt(),
@@ -74,9 +85,75 @@ public class AuditEventConsumer {
         "incident-service");
   }
 
+  @KafkaListener(topics = KafkaTopics.WORKFLOW_CREATED, groupId = "audit-service")
+  public void consumeWorkflowCreated(WorkflowCreatedEvent event) {
+    persist(
+        event.eventId(),
+        event.workflowId(),
+        AggregateType.WORKFLOW,
+        AuditEventType.WORKFLOW_CREATED,
+        null,
+        toInstant(event.createdAt()),
+        event,
+        "workflow-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.WORKFLOW_ASSIGNED, groupId = "audit-service")
+  public void consumeWorkflowAssigned(WorkflowAssignedEvent event) {
+    persist(
+        event.eventId(),
+        event.workflowId(),
+        AggregateType.WORKFLOW,
+        AuditEventType.WORKFLOW_ASSIGNED,
+        null,
+        toInstant(event.assignedAt()),
+        event,
+        "workflow-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.WORKFLOW_ESCALATED, groupId = "audit-service")
+  public void consumeWorkflowEscalated(WorkflowEscalatedEvent event) {
+    persist(
+        event.eventId(),
+        event.workflowId(),
+        AggregateType.WORKFLOW,
+        AuditEventType.WORKFLOW_ESCALATED,
+        null,
+        toInstant(event.escalatedAt()),
+        event,
+        "workflow-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.WORKFLOW_RESOLVED, groupId = "audit-service")
+  public void consumeWorkflowResolved(WorkflowResolvedEvent event) {
+    persist(
+        event.eventId(),
+        event.workflowId(),
+        AggregateType.WORKFLOW,
+        AuditEventType.WORKFLOW_RESOLVED,
+        event.resolvedBy(),
+        toInstant(event.resolvedAt()),
+        event,
+        "workflow-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.WORKFLOW_CLOSED, groupId = "audit-service")
+  public void consumeWorkflowClosed(WorkflowClosedEvent event) {
+    persist(
+        event.eventId(),
+        event.workflowId(),
+        AggregateType.WORKFLOW,
+        AuditEventType.WORKFLOW_CLOSED,
+        null,
+        toInstant(event.closedAt()),
+        event,
+        "workflow-service");
+  }
+
   private void persist(
       UUID eventId,
       UUID aggregateId,
+      AggregateType aggregateType,
       AuditEventType eventType,
       UUID performedBy,
       Instant occurredAt,
@@ -92,7 +169,7 @@ public class AuditEventConsumer {
       AuditEvent event = AuditEvent.builder()
                                    .eventId(eventId)
                                    .aggregateId(aggregateId)
-                                   .aggregateType(AggregateType.INCIDENT)
+                                   .aggregateType(aggregateType)
                                    .eventType(eventType)
                                    .performedBy(performedBy)
                                    .occurredAt(occurredAt)
@@ -107,5 +184,9 @@ public class AuditEventConsumer {
     } catch (JsonProcessingException ex) {
       log.error("Failed to serialize payload", ex);
     }
+  }
+
+  private Instant toInstant(LocalDateTime localDateTime) {
+    return localDateTime == null ? null : localDateTime.toInstant(ZoneOffset.UTC);
   }
 }
