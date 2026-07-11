@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>Incident Created</title>
+
+  <th:block th:replace="~{common/styles :: styles}"></th:block>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+  <div class="container">
+
+    <th:block
+        th:replace="~{common/header :: header('Incident Created','#16a34a','INCIDENT CREATED')}">
+    </th:block>
+
+    <div class="content">
+
+      <h2 style="color:#0f172a;margin-top:0;">
+
+        New Incident Registered
+
+      </h2>
+
+      <p style="color:#475569;line-height:1.7;">
+
+        A new incident has been successfully created in the
+        <strong>Smart Incident Response Platform</strong>.
+
+      </p>
+
+      <table>
+
+        <tr>
+          <td class="label">Incident Number</td>
+          <td class="value" th:text="${incidentNumber}"></td>
+        </tr>
+
+        <tr>
+          <td class="label">Title</td>
+          <td class="value" th:text="${title}"></td>
+        </tr>
+
+        <tr>
+          <td class="label">Description</td>
+          <td class="value" th:text="${description}"></td>
+        </tr>
+
+        <tr>
+          <td class="label">Priority</td>
+          <td class="value">
+                        <span
+                            style="background:#dc2626;color:white;padding:5px 12px;border-radius:12px;"
+                            th:text="${priority}">
+                        </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label">Severity</td>
+          <td class="value">
+                        <span
+                            style="background:#f97316;color:white;padding:5px 12px;border-radius:12px;"
+                            th:text="${severity}">
+                        </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label">Status</td>
+          <td class="value" th:text="${status}"></td>
+        </tr>
+
+        <tr>
+          <td class="label">Created By</td>
+          <td class="value" th:text="${createdBy}"></td>
+        </tr>
+
+        <tr>
+          <td class="label">Created At</td>
+          <td class="value" th:text="${createdAt}"></td>
+        </tr>
+
+      </table>
+
+      <div class="info">
+
+        Please review this incident as soon as possible.
+        High priority incidents should be acknowledged immediately.
+
+      </div>
+
+      <a
+
+          class="button"
+
+          th:href="${incidentUrl}">
+
+        View Incident
+
+      </a>
+
+    </div>
+
+    <th:block
+        th:replace="~{common/footer :: footer}">
+    </th:block>
+
+  </div>
+
+</div>
+
+</body>
+
+</html>

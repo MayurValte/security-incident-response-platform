@@ -2,7 +2,7 @@ package com.sirp.notification.feign.dto;
 
 import java.util.UUID;
 
-public record UserResponse(
+public record UserNotificationResponse(
 
     UUID id,
 

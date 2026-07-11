@@ -1,0 +1,33 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+logging:
+  level:
+    root: INFO
+
+server:
+  shutdown: graceful
+
+spring:
+
+  application:
+    name: notification-service
+
+  config:
+    import: optional:configserver:http://localhost:8888
+
+  cloud:
+
+    config:
+      fail-fast: true
+
+    consul:
+      host: localhost
+      port: 8500
+
+      discovery:
+        enabled: true
+        service-name: notification-service
