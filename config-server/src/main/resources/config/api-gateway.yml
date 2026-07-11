@@ -47,9 +47,6 @@ spring:
           predicates:
             - Path=/api/v1/notifications/**
 
+# PUBLIC key only - the Gateway verifies tokens, never issues them.
 jwt:
-  secret: 12345678901234567890123456789012345678901234567890
-  issuer: sirp-auth-service
-  audience: sirp-services
-  refresh-expiration: 604800000
-  expiration: 900000
+  public-key: ${JWT_PUBLIC_KEY}

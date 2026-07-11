@@ -9,7 +9,7 @@ spring:
 
     username: postgres
 
-    password: postgres
+    password: root
 
     driver-class-name: org.postgresql.Driver
 
@@ -80,3 +80,7 @@ management:
     health:
 
       show-details: always
+
+# PUBLIC key only - this service verifies tokens, never issues them.
+jwt:
+  public-key: ${JWT_PUBLIC_KEY}

@@ -3,17 +3,11 @@ spring:
     name: workflow-service
 
   config:
-    import: optional:configserver:http://localhost:8888
+    import: configserver:http://localhost:8888
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-
-  endpoint:
-    health:
-      show-details: always
+  cloud:
+    config:
+      fail-fast: true
 
 logging:
   level:
@@ -29,7 +23,3 @@ springdoc:
 
 server:
   forward-headers-strategy: framework
-
-# PUBLIC key only - this service verifies tokens, never issues them.
-jwt:
-  public-key: ${JWT_PUBLIC_KEY}

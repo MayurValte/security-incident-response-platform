@@ -71,9 +71,9 @@ openfeign:
 
 jwt:
 
-  secret:
+  public-key: ${JWT_PUBLIC_KEY}
 
-    12345678901234567890123456789012345678901234567890
+  private-key: ${JWT_PRIVATE_KEY}
 
   expiration:
 

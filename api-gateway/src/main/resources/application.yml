@@ -2,31 +2,24 @@ spring:
   application:
     name: api-gateway
 
-  # optional: -> boots fine even if Config Server isn't running yet.
-  # Remove "optional:" once you actually rely on it in every environment.
+  # Config Server is now REQUIRED - if it's unreachable at startup, this
+  # service must fail fast rather than boot on stale/missing config.
   config:
-    import: "optional:configserver:${CONFIG_SERVER_URI:http://localhost:8888}"
+    import: "configserver:${CONFIG_SERVER_URI:http://localhost:8888}"
 
   cloud:
+    config:
+      fail-fast: true
+
     consul:
       discovery:
         enabled: ${CONSUL_DISCOVERY_ENABLED:false}
-      host: ${CONSUL_HOST:localhost}
-      port: ${CONSUL_PORT:8500}
     gateway:
       server:
         webflux:
           discovery:
             locator:
               enabled: false   # set true once Consul discovery is enabled, to auto-route by service id
-
-server:
-  port: 8080
-
-# PUBLIC key only. Never set jwt.private-key here - the Gateway can
-# verify tokens but must never be able to mint them.
-jwt:
-  public-key: ${JWT_PUBLIC_KEY}
 
 management:
   endpoints:
