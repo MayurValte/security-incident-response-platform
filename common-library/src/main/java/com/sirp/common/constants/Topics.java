@@ -1,18 +1,16 @@
-package com.sirp.common.constant;
+package com.sirp.common.constants;
 
 public class Topics {
 
-    private Topics(){}
-
     public static final String INCIDENT_CREATED =
-            "incident-created";
-
+        "incident-created";
     public static final String INCIDENT_ASSIGNED =
-            "incident-assigned";
-
+        "incident-assigned";
     public static final String INCIDENT_RESOLVED =
-            "incident-resolved";
-
+        "incident-resolved";
     public static final String USER_CREATED =
-            "user-created";
+        "user-created";
+
+    private Topics() {
+    }
 }

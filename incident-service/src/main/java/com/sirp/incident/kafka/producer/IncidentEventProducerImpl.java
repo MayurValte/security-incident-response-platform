@@ -4,7 +4,7 @@ import com.sirp.common.events.IncidentAssignedEvent;
 import com.sirp.common.events.IncidentClosedEvent;
 import com.sirp.common.events.IncidentCreatedEvent;
 import com.sirp.common.events.IncidentResolvedEvent;
-import com.sirp.incident.kafka.topics.KafkaTopics;
+import com.sirp.common.kafka.KafkaTopics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

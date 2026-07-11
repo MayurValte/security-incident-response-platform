@@ -1,32 +1,13 @@
 package com.sirp.auth.repository;
 
 import com.sirp.auth.entity.RefreshToken;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public interface RefreshTokenRepository
-        extends JpaRepository<
-        RefreshToken,
-        Long
-        > {
-    Optional<RefreshToken>
-    findByToken(
-            String token
-    );
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
 
-    Optional<RefreshToken>
-    findByUserId(
-            Long userId
-    );
+    Optional<RefreshToken> findByToken(String token);
 
-    void deleteByUserId(
-            Long userId
-    );
-
-    Boolean existsByToken(
-            String token
-    );
+    void deleteByUserId(UUID userId);
 }

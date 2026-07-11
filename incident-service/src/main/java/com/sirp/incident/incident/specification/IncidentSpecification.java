@@ -1,8 +1,8 @@
 package com.sirp.incident.incident.specification;
 
+import com.sirp.common.enums.IncidentPriority;
+import com.sirp.common.enums.IncidentSeverity;
 import com.sirp.incident.incident.entity.Incident;
-import com.sirp.incident.incident.enums.IncidentPriority;
-import com.sirp.incident.incident.enums.IncidentSeverity;
 import com.sirp.incident.incident.enums.IncidentStatus;
 import org.springframework.data.jpa.domain.Specification;
 

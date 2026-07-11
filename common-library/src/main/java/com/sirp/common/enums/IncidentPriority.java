@@ -1,4 +1,4 @@
-package com.sirp.incident.incident.enums;
+package com.sirp.common.enums;
 
 public enum IncidentPriority {
 

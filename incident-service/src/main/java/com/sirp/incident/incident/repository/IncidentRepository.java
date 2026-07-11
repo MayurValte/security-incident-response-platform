@@ -1,8 +1,8 @@
 package com.sirp.incident.incident.repository;
 
+import com.sirp.common.enums.IncidentPriority;
+import com.sirp.common.enums.IncidentSeverity;
 import com.sirp.incident.incident.entity.Incident;
-import com.sirp.incident.incident.enums.IncidentPriority;
-import com.sirp.incident.incident.enums.IncidentSeverity;
 import com.sirp.incident.incident.enums.IncidentStatus;
 import java.util.Optional;
 import java.util.UUID;

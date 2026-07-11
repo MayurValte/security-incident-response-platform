@@ -1,6 +1,7 @@
 package com.sirp.common.enums;
 
-public enum SeverityLevel {
+public enum IncidentSeverity {
+
     LOW,
 
     MEDIUM,
@@ -8,4 +9,5 @@ public enum SeverityLevel {
     HIGH,
 
     CRITICAL
+
 }

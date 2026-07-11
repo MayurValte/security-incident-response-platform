@@ -1,29 +1,29 @@
 package com.sirp.incident.incident.dto.response;
 
-import com.sirp.incident.incident.enums.IncidentPriority;
-import com.sirp.incident.incident.enums.IncidentSeverity;
+import com.sirp.common.enums.IncidentPriority;
+import com.sirp.common.enums.IncidentSeverity;
 import com.sirp.incident.incident.enums.IncidentStatus;
-
 import java.time.Instant;
 import java.util.UUID;
 
 public record IncidentSummaryResponse(
 
-        UUID id,
+    UUID id,
 
-        String incidentNumber,
+    String incidentNumber,
 
-        String title,
+    String title,
 
-        IncidentStatus status,
+    IncidentStatus status,
 
-        IncidentSeverity severity,
+    IncidentSeverity severity,
 
-        IncidentPriority priority,
+    IncidentPriority priority,
 
-        UUID assignedTo,
+    UUID assignedTo,
 
-        Instant createdAt
+    Instant createdAt
 
 ) {
+
 }

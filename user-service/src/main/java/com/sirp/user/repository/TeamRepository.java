@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, UUID> {
 
+    boolean existsByTeamName(String teamName);
+
 }

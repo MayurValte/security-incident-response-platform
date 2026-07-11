@@ -1,4 +1,4 @@
-package com.sirp.incident.kafka.topics;
+package com.sirp.common.kafka;
 
 public final class KafkaTopics {
 

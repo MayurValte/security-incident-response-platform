@@ -1,5 +1,7 @@
 package com.sirp.incident.incident.service.impl;
 
+import com.sirp.common.enums.IncidentPriority;
+import com.sirp.common.enums.IncidentSeverity;
 import com.sirp.common.events.IncidentAssignedEvent;
 import com.sirp.common.events.IncidentClosedEvent;
 import com.sirp.common.events.IncidentCreatedEvent;
@@ -16,8 +18,6 @@ import com.sirp.incident.incident.entity.Incident;
 import com.sirp.incident.incident.entity.IncidentAssignment;
 import com.sirp.incident.incident.entity.IncidentHistory;
 import com.sirp.incident.incident.entity.IncidentSla;
-import com.sirp.incident.incident.enums.IncidentPriority;
-import com.sirp.incident.incident.enums.IncidentSeverity;
 import com.sirp.incident.incident.enums.IncidentStatus;
 import com.sirp.incident.incident.helper.AssignmentValidator;
 import com.sirp.incident.incident.helper.IncidentNumberGenerator;
@@ -64,7 +64,7 @@ public class IncidentServiceImpl implements IncidentService {
         Incident incident = incidentMapper.toEntity(request);
         incident.setIncidentNumber(generator.generate());
         incident.setStatus(IncidentStatus.OPEN);
-        incident.setCreatedBy(UUID.randomUUID());
+        incident.setCreatedBy(UUID.fromString("5c7858ad-3bbd-4fbd-8ec0-cfb72ffce8f3"));
         incident.setCreatedAt(Instant.now());
         incident.setUpdatedAt(Instant.now());
         Incident saved = incidentRepository.save(incident);
@@ -73,8 +73,8 @@ public class IncidentServiceImpl implements IncidentService {
         slaRepository.save(sla);
         producer.publishCreated(
             new IncidentCreatedEvent(UUID.randomUUID(), saved.getId(), saved.getIncidentNumber(), saved.getTitle(),
-                                     saved.getSeverity().name(), saved.getPriority().name(), saved.getCreatedBy(),
-                                     Instant.now()));
+                                     saved.getDescription(), saved.getPriority(), saved.getSeverity(),
+                                     saved.getCreatedBy(), Instant.now()));
         return incidentMapper.toResponse(saved);
     }
 
@@ -114,7 +114,7 @@ public class IncidentServiceImpl implements IncidentService {
         incident.setDescription(request.description());
         incident.setUpdatedAt(Instant.now());
         Incident saved = incidentRepository.save(incident);
-        return incidentMapper.toResponse(incident);
+        return incidentMapper.toResponse(saved);
     }
 
     @Override

@@ -1,17 +1,13 @@
 package com.sirp.auth.service;
 
 import com.sirp.auth.entity.RefreshToken;
+import java.util.UUID;
 
 public interface RefreshTokenService {
-    RefreshToken createToken(
-            Long userId
-    );
 
-    RefreshToken validateToken(
-            String token
-    );
+    RefreshToken createToken(UUID userId);
 
-    void deleteToken(
-            Long userId
-    );
+    RefreshToken validateToken(String token);
+
+    void deleteToken(UUID userId);
 }

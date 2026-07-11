@@ -1,6 +1,6 @@
 package com.sirp.incident.incident.helper;
 
-import com.sirp.incident.incident.enums.IncidentPriority;
+import com.sirp.common.enums.IncidentPriority;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import org.springframework.stereotype.Component;

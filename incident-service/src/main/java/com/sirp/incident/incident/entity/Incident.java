@@ -1,7 +1,7 @@
 package com.sirp.incident.incident.entity;
 
-import com.sirp.incident.incident.enums.IncidentPriority;
-import com.sirp.incident.incident.enums.IncidentSeverity;
+import com.sirp.common.enums.IncidentPriority;
+import com.sirp.common.enums.IncidentSeverity;
 import com.sirp.incident.incident.enums.IncidentStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

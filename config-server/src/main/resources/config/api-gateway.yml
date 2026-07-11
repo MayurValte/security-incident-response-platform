@@ -14,29 +14,42 @@ spring:
         prefer-ip-address: true
 
     gateway:
-#      discovery:
-#        locator:
-#          enabled: true
-#          lower-case-service-id: true
 
       routes:
-
-        - id: user-service
-
-          uri: lb://USER-SERVICE
-
-          predicates:
-            - Path=/api/v1/users/**
-
-        - id: incident-service
-
-          uri: lb://INCIDENT-SERVICE
-
-          predicates:
-            - Path=/incidents/**
 
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/api/v1/auth/**
 
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+
+        - id: team-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/teams/**
+
+        - id: incident-service
+          uri: lb://incident-service
+          predicates:
+            - Path=/api/v1/incidents/**
+
+        - id: audit-service
+          uri: lb://audit-service
+          predicates:
+            - Path=/api/v1/audit/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+
+jwt:
+  secret: 12345678901234567890123456789012345678901234567890
+  issuer: sirp-auth-service
+  audience: sirp-services
+  refresh-expiration: 604800000
+  expiration: 900000
