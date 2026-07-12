@@ -1,6 +1,5 @@
 package com.sirp.audit.audit.repository;
 
-import com.sirp.audit.audit.entity.AggregateType;
 import com.sirp.audit.audit.entity.AuditEvent;
 import com.sirp.audit.audit.entity.AuditEventType;
 import java.util.UUID;
@@ -38,12 +37,4 @@ public interface AuditEventRepository extends JpaRepository<AuditEvent, UUID>, J
         Pageable pageable
 
                                     );
-
-    Page<AuditEvent> findByAggregateType(
-
-        AggregateType aggregateType,
-
-        Pageable pageable
-
-                                        );
 }

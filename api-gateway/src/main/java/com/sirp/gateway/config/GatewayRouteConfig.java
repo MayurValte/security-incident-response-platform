@@ -37,10 +37,6 @@ public class GatewayRouteConfig {
                 .uri("http://localhost:8086"))
             .route("analytics-service", r -> r.path("/api/v1/analytics/**")
                 .uri("http://localhost:8087"))
-            .route("playbook-service", r -> r.path("/api/v1/playbooks/**")
-                .uri("http://localhost:8084"))
-            .route("reporting-service", r -> r.path("/api/v1/reports/**")
-                .uri("http://localhost:8085"))
             .build();
     }
 }

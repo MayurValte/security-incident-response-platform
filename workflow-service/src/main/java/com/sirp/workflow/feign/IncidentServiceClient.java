@@ -5,7 +5,6 @@ import com.sirp.workflow.feign.dto.IncidentResponse;
 import com.sirp.workflow.feign.dto.ResolveIncidentRequest;
 import java.util.UUID;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,15 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "incident-service")
 public interface IncidentServiceClient {
 
-    @GetMapping("/internal/incidents/{id}")
-    IncidentResponse getIncident(@PathVariable UUID id);
-
     @PutMapping("/internal/incidents/{id}/assign")
     IncidentResponse assignIncident(@PathVariable UUID id,
         @RequestBody AssignIncidentRequest request);
-
-    @PutMapping("/internal/incidents/{id}/start")
-    IncidentResponse startIncident(@PathVariable UUID id);
 
     @PutMapping("/internal/incidents/{id}/resolve")
     IncidentResponse resolveIncident(@PathVariable UUID id,
