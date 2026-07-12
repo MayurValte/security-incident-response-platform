@@ -6,7 +6,7 @@ import com.sirp.common.events.IncidentCreatedEvent;
 import com.sirp.common.events.IncidentResolvedEvent;
 import com.sirp.notification.email.model.IncidentEmailModel;
 import com.sirp.notification.email.template.EmailTemplateRenderer;
-import com.sirp.notification.feign.UserClient;
+import com.sirp.notification.feign.ResilientUserClient;
 import com.sirp.notification.feign.dto.UserNotificationResponse;
 import com.sirp.notification.notification.dispatcher.NotificationDispatcher;
 import com.sirp.notification.notification.entity.Notification;
@@ -30,7 +30,7 @@ public class NotificationEventHandlerImpl implements NotificationEventHandler {
 
     private final NotificationRepository notificationRepository;
     private final NotificationDispatcher notificationDispatcher;
-    private final UserClient userClient;
+    private final ResilientUserClient userClient;
     private final EmailTemplateRenderer renderer;
 
     @Override

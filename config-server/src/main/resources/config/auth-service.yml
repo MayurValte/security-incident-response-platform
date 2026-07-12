@@ -93,6 +93,31 @@ jwt:
 
 
 
+# Circuit breaker around the UserClient Feign call (auth-service -> user-service),
+# used by AuthServiceImpl (login/refresh) and CustomUserDetailsService (login).
+# 4xx responses (e.g. unknown email) are business outcomes, not backend health
+# signals, so they're excluded from the failure count - only 5xx/timeouts/
+# connection failures count toward tripping the breaker.
+resilience4j:
+
+  circuitbreaker:
+
+    instances:
+
+      user-service:
+
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+        ignore-exceptions:
+          - feign.FeignException.FeignClientException
+
+
 management:
 
   endpoints:
@@ -101,7 +126,7 @@ management:
 
       exposure:
 
-        include: health,info,metrics
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents
 
 
   endpoint:

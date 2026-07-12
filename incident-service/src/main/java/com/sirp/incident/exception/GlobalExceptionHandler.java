@@ -59,6 +59,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(UserServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleUserServiceUnavailable(UserServiceUnavailableException ex,
+        HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(Instant.now(), 503, "Service Unavailable", ex.getMessage(),
+                                                   request.getRequestURI(),
+                                                   ErrorCode.USER_SERVICE_UNAVAILABLE.name(), List.of());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<ErrorResponse> optimistic(OptimisticLockingFailureException ex,
         HttpServletRequest request) {

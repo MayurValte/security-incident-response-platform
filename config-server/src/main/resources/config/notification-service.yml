@@ -83,6 +83,31 @@ spring:
 
             enable: true
 
+# Circuit breaker around the UserClient Feign call (notification-service ->
+# user-service), used when building the recipient list for an incident-lifecycle
+# email. The fallback already degrades gracefully (skips the notification and
+# logs a warning) rather than throwing, so this mostly protects against wasting
+# time/threads on a hung backend rather than needing 4xx business-outcome
+# exclusions - still ignoring 4xx to keep the failure-rate signal meaningful.
+resilience4j:
+
+  circuitbreaker:
+
+    instances:
+
+      user-service:
+
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+        ignore-exceptions:
+          - feign.FeignException.FeignClientException
+
 management:
 
   endpoint:
@@ -97,7 +122,7 @@ management:
 
       exposure:
 
-        include: health,info,metrics
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents
 
 springdoc:
 

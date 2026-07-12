@@ -1,7 +1,7 @@
 package com.sirp.auth.security;
 
 import com.sirp.auth.dto.response.UserSecurityResponse;
-import com.sirp.auth.feign.UserClient;
+import com.sirp.auth.feign.ResilientUserClient;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserClient userClient;
+    private final ResilientUserClient userClient;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -34,7 +34,16 @@ public class CustomUserDetailsService implements UserDetailsService {
             UserSecurityResponse user = userClient.findByEmail(email);
             return new UserPrincipal(user);
         } catch (FeignException ex) {
-            throw new UsernameNotFoundException("User not found: " + email, ex);
+            // Only a genuine 404 means "no such user" - a real 5xx/timeout from
+            // user-service isn't a bad-credentials case and shouldn't be reported
+            // as one. Circuit-open failures surface as UserServiceUnavailableException
+            // instead (thrown by ResilientUserClient's fallback), which isn't a
+            // FeignException at all and so isn't caught here - it propagates to
+            // GlobalExceptionHandler as a 503.
+            if (ex.status() == 404) {
+                throw new UsernameNotFoundException("User not found: " + email, ex);
+            }
+            throw ex;
         }
     }
 }

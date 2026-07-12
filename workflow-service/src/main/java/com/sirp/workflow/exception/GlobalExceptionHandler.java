@@ -42,6 +42,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(IncidentServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleIncidentServiceUnavailable(IncidentServiceUnavailableException ex,
+        HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(Instant.now(), HttpStatus.SERVICE_UNAVAILABLE.value(),
+                                                   HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase(), ex.getMessage(),
+                                                   request.getRequestURI(), "INCIDENT_SERVICE_UNAVAILABLE", List.of());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex,
         HttpServletRequest request) {

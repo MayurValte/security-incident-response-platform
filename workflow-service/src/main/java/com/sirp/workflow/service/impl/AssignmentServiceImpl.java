@@ -7,7 +7,7 @@ import com.sirp.workflow.dto.response.WorkflowResponse;
 import com.sirp.workflow.entity.WorkflowEntity;
 import com.sirp.workflow.exception.InvalidWorkflowStateException;
 import com.sirp.workflow.exception.WorkflowNotFoundException;
-import com.sirp.workflow.feign.IncidentServiceClient;
+import com.sirp.workflow.feign.ResilientIncidentServiceClient;
 import com.sirp.workflow.feign.dto.AssignIncidentRequest;
 import com.sirp.workflow.kafka.producer.WorkflowEventProducer;
 import com.sirp.workflow.mapper.WorkflowMapper;
@@ -33,7 +33,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final WorkflowRepository repository;
     private final WorkflowMapper mapper;
     private final WorkflowEventProducer producer;
-    private final IncidentServiceClient incidentServiceClient;
+    private final ResilientIncidentServiceClient incidentServiceClient;
 
     @Override
     public WorkflowResponse assignWorkflow(UUID workflowId, AssignWorkflowRequest request, UUID actorId) {

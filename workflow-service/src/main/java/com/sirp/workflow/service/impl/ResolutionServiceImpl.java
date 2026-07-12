@@ -9,7 +9,7 @@ import com.sirp.workflow.dto.response.WorkflowResponse;
 import com.sirp.workflow.entity.WorkflowEntity;
 import com.sirp.workflow.exception.InvalidWorkflowStateException;
 import com.sirp.workflow.exception.WorkflowNotFoundException;
-import com.sirp.workflow.feign.IncidentServiceClient;
+import com.sirp.workflow.feign.ResilientIncidentServiceClient;
 import com.sirp.workflow.feign.dto.ResolveIncidentRequest;
 import com.sirp.workflow.kafka.producer.WorkflowEventProducer;
 import com.sirp.workflow.mapper.WorkflowMapper;
@@ -35,7 +35,7 @@ public class ResolutionServiceImpl implements ResolutionService {
     private final WorkflowRepository repository;
     private final WorkflowMapper mapper;
     private final WorkflowEventProducer producer;
-    private final IncidentServiceClient incidentServiceClient;
+    private final ResilientIncidentServiceClient incidentServiceClient;
 
     @Override
     public WorkflowResponse resolveWorkflow(UUID workflowId, ResolveWorkflowRequest request, UUID actorId) {

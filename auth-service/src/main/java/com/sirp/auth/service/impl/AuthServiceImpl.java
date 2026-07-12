@@ -5,7 +5,7 @@ import com.sirp.auth.dto.request.RefreshTokenRequest;
 import com.sirp.auth.dto.response.AuthResponse;
 import com.sirp.auth.dto.response.UserSecurityResponse;
 import com.sirp.auth.entity.RefreshToken;
-import com.sirp.auth.feign.UserClient;
+import com.sirp.auth.feign.ResilientUserClient;
 import com.sirp.auth.security.TokenIssuerService;
 import com.sirp.auth.service.AuthService;
 import com.sirp.auth.service.RefreshTokenService;
@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final UserClient userClient;
+    private final ResilientUserClient userClient;
     private final TokenIssuerService tokenIssuerService;
     private final JwtProperties jwtProperties;
     private final RefreshTokenService refreshTokenService;

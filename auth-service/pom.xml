@@ -92,6 +92,16 @@
     </dependency>
 
     <dependency>
+      <artifactId>spring-boot-starter-aop</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+    <dependency>
+      <artifactId>resilience4j-spring-boot3</artifactId>
+      <groupId>io.github.resilience4j</groupId>
+      <version>2.2.0</version>
+    </dependency>
+
+    <dependency>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <groupId>org.springdoc</groupId>
       <version>2.8.5</version>

@@ -60,6 +60,33 @@ spring:
 
         service-name: incident-service
 
+# Circuit breaker around the UserClient Feign call (incident-service -> user-service),
+# used by AssignmentValidator when validating an assignee. 4xx responses (e.g.
+# assignee doesn't exist) are business outcomes, not backend health signals, and
+# InactiveUserException/UserNotFoundException are thrown by AssignmentValidator's
+# own post-call checks, not by the Feign call itself - all three are excluded from
+# the failure count so only real user-service outages trip the breaker.
+resilience4j:
+
+  circuitbreaker:
+
+    instances:
+
+      user-service:
+
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+        ignore-exceptions:
+          - feign.FeignException.FeignClientException
+          - com.sirp.incident.exception.UserNotFoundException
+          - com.sirp.incident.exception.InactiveUserException
+
 management:
 
   endpoint:
@@ -73,7 +100,7 @@ management:
 
       exposure:
 
-        include: health,info,metrics
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents
 
 springdoc:
 

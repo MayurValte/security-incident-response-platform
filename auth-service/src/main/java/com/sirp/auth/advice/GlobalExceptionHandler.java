@@ -1,5 +1,6 @@
 package com.sirp.auth.advice;
 
+import com.sirp.auth.exception.UserServiceUnavailableException;
 import com.sirp.common.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
@@ -38,6 +39,22 @@ public class GlobalExceptionHandler {
                         request.getRequestURI()
                 );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(UserServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> userServiceUnavailable(
+            UserServiceUnavailableException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response =
+                new ErrorResponse(
+                        Instant.now(),
+                        HttpStatus.SERVICE_UNAVAILABLE.value(),
+                        "Service Unavailable",
+                        "User service is temporarily unavailable. Please try again shortly.",
+                        request.getRequestURI()
+                );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 
     @ExceptionHandler(Exception.class)
