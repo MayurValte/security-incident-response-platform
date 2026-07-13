@@ -11,6 +11,7 @@ import com.sirp.common.kafka.KafkaTopics;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
  * here is aggregation (counts, resolution time), not a legal/compliance
  * audit trail. Runs its own consumer group so it doesn't compete with
  * audit-service for partitions.
+ *
+ * Each listener here is the write side of AnalyticsServiceImpl's
+ * @Cacheable read methods: any of the four incident lifecycle events can
+ * change every cached read shape (a new CREATED changes summary counts,
+ * severity/priority breakdowns, and the daily trend all at once), so all
+ * four caches are cleared on every event rather than trying to target
+ * just the affected entries. Redis is shared across all analytics-service
+ * instances, so this evicts the cache for the whole service, not just
+ * whichever instance's consumer happened to process the record.
  */
 @Component
 @RequiredArgsConstructor
@@ -30,10 +40,18 @@ public class AnalyticsEventConsumer {
 
     private static final String GROUP_ID = "analytics-service";
 
+    // Annotation array attributes need compile-time constants inlined at
+    // each use site - a shared String[] field can't be referenced there.
+    private static final String CACHE_SUMMARY = "analytics-summary";
+    private static final String CACHE_BY_SEVERITY = "analytics-by-severity";
+    private static final String CACHE_BY_PRIORITY = "analytics-by-priority";
+    private static final String CACHE_TREND = "analytics-trend";
+
     private final IncidentAnalyticsRepository repository;
 
     @KafkaListener(topics = KafkaTopics.INCIDENT_CREATED, groupId = GROUP_ID)
     @Transactional
+    @CacheEvict(cacheNames = {CACHE_SUMMARY, CACHE_BY_SEVERITY, CACHE_BY_PRIORITY, CACHE_TREND}, allEntries = true)
     public void consumeCreated(IncidentCreatedEvent event) {
         if (repository.existsByIncidentId(event.incidentId())) {
             log.debug("Duplicate IncidentCreatedEvent ignored [{}]", event.incidentId());
@@ -56,6 +74,7 @@ public class AnalyticsEventConsumer {
 
     @KafkaListener(topics = KafkaTopics.INCIDENT_ASSIGNED, groupId = GROUP_ID)
     @Transactional
+    @CacheEvict(cacheNames = {CACHE_SUMMARY, CACHE_BY_SEVERITY, CACHE_BY_PRIORITY, CACHE_TREND}, allEntries = true)
     public void consumeAssigned(IncidentAssignedEvent event) {
         repository.findByIncidentId(event.incidentId()).ifPresentOrElse(record -> {
             record.setStatus(AnalyticsStatus.ASSIGNED);
@@ -66,6 +85,7 @@ public class AnalyticsEventConsumer {
 
     @KafkaListener(topics = KafkaTopics.INCIDENT_RESOLVED, groupId = GROUP_ID)
     @Transactional
+    @CacheEvict(cacheNames = {CACHE_SUMMARY, CACHE_BY_SEVERITY, CACHE_BY_PRIORITY, CACHE_TREND}, allEntries = true)
     public void consumeResolved(IncidentResolvedEvent event) {
         repository.findByIncidentId(event.incidentId()).ifPresentOrElse(record -> {
             record.setStatus(AnalyticsStatus.RESOLVED);
@@ -77,6 +97,7 @@ public class AnalyticsEventConsumer {
 
     @KafkaListener(topics = KafkaTopics.INCIDENT_CLOSED, groupId = GROUP_ID)
     @Transactional
+    @CacheEvict(cacheNames = {CACHE_SUMMARY, CACHE_BY_SEVERITY, CACHE_BY_PRIORITY, CACHE_TREND}, allEntries = true)
     public void consumeClosed(IncidentClosedEvent event) {
         repository.findByIncidentId(event.incidentId()).ifPresentOrElse(record -> {
             record.setStatus(AnalyticsStatus.CLOSED);
