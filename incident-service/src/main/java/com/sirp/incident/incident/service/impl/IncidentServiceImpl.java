@@ -121,6 +121,7 @@ public class IncidentServiceImpl implements IncidentService {
     public IncidentResponse assignIncident(UUID id, AssignIncidentRequest request, UUID actorId) {
         Incident incident = incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));
         validator.validate(incident.getStatus(), IncidentStatus.ACKNOWLEDGED);
+        assignmentValidator.validate(request.assignedTo());
         UUID effectiveActor = actorId != null ? actorId : incident.getCreatedBy();
         IncidentHistory history = IncidentHistory.builder()
                                                  .incident(incident)

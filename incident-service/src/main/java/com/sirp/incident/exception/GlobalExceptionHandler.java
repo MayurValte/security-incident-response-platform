@@ -59,6 +59,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(Instant.now(), 404, "Not Found", ex.getMessage(),
+                                                   request.getRequestURI(), ErrorCode.USER_NOT_FOUND.name(),
+                                                   List.of());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(InactiveUserException.class)
+    public ResponseEntity<ErrorResponse> handleInactiveUser(InactiveUserException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(Instant.now(), 400, "Bad Request", ex.getMessage(),
+                                                   request.getRequestURI(), ErrorCode.INACTIVE_USER.name(),
+                                                   List.of());
+        return ResponseEntity.badRequest().body(response);
+    }
+
     @ExceptionHandler(UserServiceUnavailableException.class)
     public ResponseEntity<ErrorResponse> handleUserServiceUnavailable(UserServiceUnavailableException ex,
         HttpServletRequest request) {
