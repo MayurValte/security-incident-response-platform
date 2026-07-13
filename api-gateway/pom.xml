@@ -75,6 +75,10 @@
       <groupId>org.springframework.boot</groupId>
     </dependency>
     <dependency>
+      <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+    <dependency>
       <artifactId>micrometer-registry-prometheus</artifactId>
       <groupId>io.micrometer</groupId>
     </dependency>

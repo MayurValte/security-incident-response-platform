@@ -96,4 +96,8 @@ public class Notification {
     @Column(name = "recipient_phone", length = 30)
     private String recipientPhone;
 
+    @Builder.Default
+    @Column(name = "retry_count", nullable = false)
+    private Integer retryCount = 0;
+
 }

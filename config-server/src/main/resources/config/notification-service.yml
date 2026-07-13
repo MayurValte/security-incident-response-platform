@@ -109,6 +109,17 @@ spring:
 
             enable: true
 
+# How often NotificationRetryScheduler sweeps FAILED notifications for a
+# re-send attempt (capped at 3 attempts per notification - see that
+# class). 5 minutes is a middle ground: frequent enough that a transient
+# SMTP blip gets fixed without operator intervention, not so frequent
+# it hammers Gmail on every failure.
+notification:
+
+  retry:
+
+    check-interval-ms: 300000
+
 # Circuit breaker around the UserClient Feign call (notification-service ->
 # user-service), used when building the recipient list for an incident-lifecycle
 # email. The fallback already degrades gracefully (skips the notification and

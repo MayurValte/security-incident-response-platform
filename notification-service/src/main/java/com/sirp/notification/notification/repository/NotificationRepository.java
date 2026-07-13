@@ -2,6 +2,7 @@ package com.sirp.notification.notification.repository;
 
 import com.sirp.notification.notification.entity.Notification;
 import com.sirp.notification.notification.enums.NotificationChannel;
+import com.sirp.notification.notification.enums.NotificationStatus;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,5 +19,7 @@ public interface NotificationRepository
     boolean existsByEventIdAndChannel(
         UUID eventId,
         NotificationChannel channel);
+
+    List<Notification> findByStatusAndRetryCountLessThan(NotificationStatus status, int maxRetryCount);
 
 }

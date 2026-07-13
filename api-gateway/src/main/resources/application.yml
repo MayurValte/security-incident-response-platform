@@ -21,6 +21,11 @@ spring:
             locator:
               enabled: false   # set true once Consul discovery is enabled, to auto-route by service id
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 management:
   tracing:
     sampling:

@@ -26,7 +26,16 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
             log.info("HTML email sent to {}", to);
         } catch (Exception ex) {
-            log.error("Failed to send email", ex);
+            // MUST propagate, not just log: the caller chain
+            // (EmailNotificationSender -> NotificationDispatcherImpl ->
+            // NotificationEventHandlerImpl.dispatchAndRecordOutcome) relies
+            // on an exception here to mark the notification FAILED and
+            // record failureReason. Swallowing it meant every send
+            // attempt - success or failure - ended up recorded as SENT,
+            // so a real SMTP outage silently dropped notifications with
+            // no trace, and NotificationRetryScheduler would never see
+            // rows to retry in the first place.
+            throw new IllegalStateException("Failed to send email to " + to, ex);
         }
     }
 }
