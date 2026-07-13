@@ -44,6 +44,10 @@ spring:
       properties:
         enable.idempotence: true
 
+    template:
+
+      observation-enabled: true
+
   cloud:
 
     consul:
@@ -94,7 +98,23 @@ resilience4j:
           - com.sirp.incident.exception.UserNotFoundException
           - com.sirp.incident.exception.InactiveUserException
 
+# Distributed tracing (see CLAUDE.md's "Distributed tracing" section for
+# the full picture, including why Kafka needs separate opt-in config
+# from Feign/HTTP). 100% sampling is a dev-scale choice, not a
+# production default - see that section for the reasoning.
 management:
+
+  tracing:
+
+    sampling:
+
+      probability: 1.0
+
+  zipkin:
+
+    tracing:
+
+      endpoint: http://localhost:9411/api/v2/spans
 
   endpoint:
 

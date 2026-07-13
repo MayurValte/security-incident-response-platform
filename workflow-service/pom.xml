@@ -149,6 +149,23 @@
       <groupId>org.springframework.cloud</groupId>
     </dependency>
 
+    <!-- Tracing -->
+
+    <dependency>
+      <artifactId>micrometer-tracing-bridge-brave</artifactId>
+      <groupId>io.micrometer</groupId>
+    </dependency>
+
+    <dependency>
+      <artifactId>zipkin-reporter-brave</artifactId>
+      <groupId>io.zipkin.reporter2</groupId>
+    </dependency>
+
+    <dependency>
+      <artifactId>feign-micrometer</artifactId>
+      <groupId>io.github.openfeign</groupId>
+    </dependency>
+
     <!-- Resilience4j (circuit breakers around Feign calls) -->
 
     <dependency>

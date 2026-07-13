@@ -140,6 +140,18 @@ services:
     restart: unless-stopped
 
 
+  zipkin:
+
+    image: openzipkin/zipkin:latest
+
+    container_name: sirp-zipkin
+
+    ports:
+      - "9411:9411"
+
+    restart: unless-stopped
+
+
 volumes:
 
   postgres_data:
