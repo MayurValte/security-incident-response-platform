@@ -61,21 +61,6 @@ spring:
             loggerLevel: full
 
 
-
-openfeign:
-
-  client:
-
-    config:
-
-      default:
-
-        connectTimeout: 3000
-
-        readTimeout: 5000
-
-
-
 jwt:
 
   public-key: ${JWT_PUBLIC_KEY}

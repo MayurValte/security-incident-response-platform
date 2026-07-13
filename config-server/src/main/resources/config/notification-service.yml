@@ -61,6 +61,13 @@ spring:
 
         service-name: notification-service
 
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 3000
+            readTimeout: 5000
+
   mail:
 
     host: smtp.gmail.com

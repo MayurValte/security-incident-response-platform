@@ -79,6 +79,13 @@ spring:
 
         service-name: workflow-service
 
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 3000
+            readTimeout: 5000
+
 # Circuit breaker around the IncidentServiceClient Feign calls (workflow-service
 # -> incident-service), used by AssignmentServiceImpl/ResolutionServiceImpl when
 # mirroring a workflow assign/resolve/close onto the underlying incident. 4xx

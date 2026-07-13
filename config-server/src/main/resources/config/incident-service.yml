@@ -60,6 +60,13 @@ spring:
 
         service-name: incident-service
 
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 3000
+            readTimeout: 5000
+
 # Circuit breaker around the UserClient Feign call (incident-service -> user-service),
 # used by AssignmentValidator when validating an assignee. 4xx responses (e.g.
 # assignee doesn't exist) are business outcomes, not backend health signals, and
