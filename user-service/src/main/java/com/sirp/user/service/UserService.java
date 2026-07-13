@@ -11,15 +11,15 @@ import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
-    UserResponse create(CreateUserRequest request);
+    UserResponse create(CreateUserRequest request, UUID actorId);
 
     UserResponse get(UUID id);
 
     Page<UserResponse> getAll(Pageable pageable);
 
-    UserResponse update(UUID id, UpdateUserRequest request);
+    UserResponse update(UUID id, UpdateUserRequest request, UUID actorId);
 
-    void delete(UUID id);
+    void delete(UUID id, UUID actorId);
 
     UserSecurityResponse findByEmail(String email);
 

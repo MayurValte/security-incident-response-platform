@@ -6,13 +6,19 @@ import com.sirp.auth.dto.response.AuthResponse;
 import com.sirp.auth.dto.response.UserSecurityResponse;
 import com.sirp.auth.entity.RefreshToken;
 import com.sirp.auth.feign.ResilientUserClient;
+import com.sirp.auth.kafka.producer.AuthEventProducer;
 import com.sirp.auth.security.TokenIssuerService;
 import com.sirp.auth.service.AuthService;
+import com.sirp.auth.security.LoginAttemptService;
 import com.sirp.auth.service.RefreshTokenService;
+import com.sirp.common.events.AuthLoginFailedEvent;
+import com.sirp.common.events.AuthLoginSucceededEvent;
 import com.sirp.security.properties.JwtProperties;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,12 +39,25 @@ public class AuthServiceImpl implements AuthService {
     private final TokenIssuerService tokenIssuerService;
     private final JwtProperties jwtProperties;
     private final RefreshTokenService refreshTokenService;
+    private final AuthEventProducer authEventProducer;
+    private final LoginAttemptService loginAttemptService;
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+        loginAttemptService.checkNotLocked(request.email());
+        try {
+            authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+        } catch (AuthenticationException ex) {
+            loginAttemptService.recordFailure(request.email());
+            authEventProducer.publishLoginFailed(new AuthLoginFailedEvent(
+                UUID.randomUUID(), request.email(), ex.getClass().getSimpleName(), Instant.now()));
+            throw ex;
+        }
+        loginAttemptService.recordSuccess(request.email());
         UserSecurityResponse user = userClient.findByEmail(request.email());
+        authEventProducer.publishLoginSucceeded(new AuthLoginSucceededEvent(
+            UUID.randomUUID(), user.id(), user.email(), Instant.now()));
         String accessToken = tokenIssuerService.generateAccessToken(user.id(), user.email(), user.role());
         RefreshToken refreshToken = refreshTokenService.createToken(user.id());
         return new AuthResponse(accessToken, refreshToken.getToken(), "Bearer",

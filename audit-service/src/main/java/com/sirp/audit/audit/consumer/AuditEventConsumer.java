@@ -6,16 +6,22 @@ import com.sirp.audit.audit.entity.AggregateType;
 import com.sirp.audit.audit.entity.AuditEvent;
 import com.sirp.audit.audit.entity.AuditEventType;
 import com.sirp.audit.audit.repository.AuditEventRepository;
+import com.sirp.common.events.AuthLoginFailedEvent;
+import com.sirp.common.events.AuthLoginSucceededEvent;
 import com.sirp.common.events.IncidentAssignedEvent;
 import com.sirp.common.events.IncidentClosedEvent;
 import com.sirp.common.events.IncidentCreatedEvent;
 import com.sirp.common.events.IncidentResolvedEvent;
+import com.sirp.common.events.UserCreatedEvent;
+import com.sirp.common.events.UserDeletedEvent;
+import com.sirp.common.events.UserUpdatedEvent;
 import com.sirp.common.events.workflow.WorkflowAssignedEvent;
 import com.sirp.common.events.workflow.WorkflowClosedEvent;
 import com.sirp.common.events.workflow.WorkflowCreatedEvent;
 import com.sirp.common.events.workflow.WorkflowEscalatedEvent;
 import com.sirp.common.events.workflow.WorkflowResolvedEvent;
 import com.sirp.common.kafka.KafkaTopics;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -148,6 +154,76 @@ public class AuditEventConsumer {
         toInstant(event.closedAt()),
         event,
         "workflow-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.AUTH_LOGIN_SUCCEEDED, groupId = "audit-service")
+  public void consumeLoginSucceeded(AuthLoginSucceededEvent event) {
+    persist(
+        event.eventId(),
+        event.userId(),
+        AggregateType.AUTH,
+        AuditEventType.LOGIN_SUCCESS,
+        event.userId(),
+        event.occurredAt(),
+        event,
+        "auth-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.AUTH_LOGIN_FAILED, groupId = "audit-service")
+  public void consumeLoginFailed(AuthLoginFailedEvent event) {
+    // No real user id exists for a failed login against an unknown email -
+    // a deterministic pseudo-id derived from the email lets repeated failed
+    // attempts against the same address still correlate together in queries,
+    // while aggregate_id stays non-null as the schema requires.
+    UUID pseudoAggregateId = UUID.nameUUIDFromBytes(event.email().getBytes(StandardCharsets.UTF_8));
+    persist(
+        event.eventId(),
+        pseudoAggregateId,
+        AggregateType.AUTH,
+        AuditEventType.LOGIN_FAILED,
+        null,
+        event.occurredAt(),
+        event,
+        "auth-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.USER_CREATED, groupId = "audit-service")
+  public void consumeUserCreated(UserCreatedEvent event) {
+    persist(
+        event.eventId(),
+        event.userId(),
+        AggregateType.USER,
+        AuditEventType.USER_CREATED,
+        event.createdBy(),
+        event.occurredAt(),
+        event,
+        "user-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.USER_UPDATED, groupId = "audit-service")
+  public void consumeUserUpdated(UserUpdatedEvent event) {
+    persist(
+        event.eventId(),
+        event.userId(),
+        AggregateType.USER,
+        AuditEventType.USER_UPDATED,
+        event.updatedBy(),
+        event.occurredAt(),
+        event,
+        "user-service");
+  }
+
+  @KafkaListener(topics = KafkaTopics.USER_DELETED, groupId = "audit-service")
+  public void consumeUserDeleted(UserDeletedEvent event) {
+    persist(
+        event.eventId(),
+        event.userId(),
+        AggregateType.USER,
+        AuditEventType.USER_DELETED,
+        event.deletedBy(),
+        event.occurredAt(),
+        event,
+        "user-service");
   }
 
   private void persist(

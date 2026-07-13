@@ -33,6 +33,34 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+  kafka:
+
+    bootstrap-servers: localhost:29092
+
+    producer:
+
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      acks: all
+
+      retries: 3
+
+      properties:
+        enable.idempotence: true
+
+    template:
+
+      observation-enabled: true
+
+  data:
+
+    redis:
+
+      host: localhost
+
+      port: 6379
 
   cloud:
 
@@ -76,6 +104,20 @@ jwt:
 
     604800000
 
+
+# Brute-force protection (LoginAttemptService): 5 failed attempts against
+# the same email within a 15-minute window locks that account out for 15
+# minutes. Counters live in Redis, not the DB - see LoginAttemptServiceImpl
+# for why.
+auth:
+
+  login-throttle:
+
+    max-attempts: 5
+
+    attempt-window-seconds: 900
+
+    lockout-seconds: 900
 
 
 # Circuit breaker around the UserClient Feign call (auth-service -> user-service),

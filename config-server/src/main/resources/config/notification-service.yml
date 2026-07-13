@@ -93,9 +93,9 @@ spring:
 
     port: 587
 
-    username: mayurvalte2017@gmail.com
+    username: ${MAIL_USERNAME}
 
-    password: yvec kewf rhzs zcig
+    password: ${MAIL_PASSWORD}
 
     properties:
 

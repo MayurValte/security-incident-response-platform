@@ -1,5 +1,6 @@
 package com.sirp.user.controller;
 
+import com.sirp.security.model.JwtUser;
 import com.sirp.user.dto.CreateUserRequest;
 import com.sirp.user.dto.UpdateUserRequest;
 import com.sirp.user.dto.UserResponse;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,8 +30,9 @@ public class UserController {
     private final UserService service;
 
     @PostMapping
-    public ResponseEntity<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
+    public ResponseEntity<UserResponse> create(@Valid @RequestBody CreateUserRequest request,
+            @AuthenticationPrincipal JwtUser principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, principal.userId()));
     }
 
     @GetMapping("/{id}")
@@ -43,13 +46,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> update(@PathVariable UUID id, @RequestBody UpdateUserRequest request) {
-        return ResponseEntity.ok(service.update(id, request));
+    public ResponseEntity<UserResponse> update(@PathVariable UUID id, @RequestBody UpdateUserRequest request,
+            @AuthenticationPrincipal JwtUser principal) {
+        return ResponseEntity.ok(service.update(id, request, principal.userId()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        service.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable UUID id, @AuthenticationPrincipal JwtUser principal) {
+        service.delete(id, principal.userId());
         return ResponseEntity.noContent().build();
     }
 }

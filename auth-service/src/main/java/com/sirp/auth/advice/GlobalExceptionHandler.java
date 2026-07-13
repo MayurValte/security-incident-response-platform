@@ -1,5 +1,6 @@
 package com.sirp.auth.advice;
 
+import com.sirp.auth.exception.AccountLockedException;
 import com.sirp.auth.exception.UserServiceUnavailableException;
 import com.sirp.common.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +40,22 @@ public class GlobalExceptionHandler {
                         request.getRequestURI()
                 );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<ErrorResponse> accountLocked(
+            AccountLockedException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response =
+                new ErrorResponse(
+                        Instant.now(),
+                        HttpStatus.LOCKED.value(),
+                        "Account Locked",
+                        ex.getMessage(),
+                        request.getRequestURI()
+                );
+        return ResponseEntity.status(HttpStatus.LOCKED).body(response);
     }
 
     @ExceptionHandler(UserServiceUnavailableException.class)
