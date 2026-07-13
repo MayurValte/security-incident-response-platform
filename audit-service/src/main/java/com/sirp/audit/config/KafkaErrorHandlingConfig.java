@@ -1,11 +1,16 @@
 package com.sirp.audit.config;
 
+import java.util.UUID;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
+import org.slf4j.MDC;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.listener.RecordInterceptor;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 
 @Configuration
@@ -35,5 +40,35 @@ public class KafkaErrorHandlingConfig {
         backOff.setMaxInterval(10_000L);
 
         return new DefaultErrorHandler(recoverer, backOff);
+    }
+
+    /**
+     * Correlation ID = the current record's Micrometer trace ID (see
+     * sirp-security's CorrelationIdFilter for the HTTP-side equivalent
+     * and the reasoning against building a second ID scheme) - Spring
+     * Kafka's observation instrumentation (spring.kafka.listener.
+     * observation-enabled: true) already puts "traceId" into MDC before
+     * the listener method runs, this just mirrors it under an explicit
+     * "correlationId" key so grep-by-name works the same way across the
+     * HTTP and Kafka sides. Auto-applied to every @KafkaListener in this
+     * service the same way the DefaultErrorHandler bean above is.
+     */
+    @Bean
+    public RecordInterceptor<Object, Object> correlationIdRecordInterceptor() {
+        return new RecordInterceptor<>() {
+            @Override
+            public ConsumerRecord<Object, Object> intercept(ConsumerRecord<Object, Object> record,
+                Consumer<Object, Object> consumer) {
+                String correlationId = MDC.get("traceId");
+                MDC.put("correlationId", (correlationId == null || correlationId.isBlank())
+                    ? UUID.randomUUID().toString() : correlationId);
+                return record;
+            }
+
+            @Override
+            public void afterRecord(ConsumerRecord<Object, Object> record, Consumer<Object, Object> consumer) {
+                MDC.remove("correlationId");
+            }
+        };
     }
 }

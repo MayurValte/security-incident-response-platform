@@ -1,5 +1,6 @@
 package com.sirp.security.autoconfigure;
 
+import com.sirp.security.filter.CorrelationIdFilter;
 import com.sirp.security.filter.JwtAuthenticationFilter;
 import com.sirp.security.handler.RestAccessDeniedHandler;
 import com.sirp.security.handler.RestAuthenticationEntryPoint;
@@ -40,6 +41,12 @@ public class SirpSecurityServletAutoConfiguration {
     @ConditionalOnMissingBean
     public JwtAuthenticationFilter jwtAuthenticationFilter(JwtValidationService jwtValidationService) {
         return new JwtAuthenticationFilter(jwtValidationService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CorrelationIdFilter correlationIdFilter() {
+        return new CorrelationIdFilter();
     }
 
     @Bean

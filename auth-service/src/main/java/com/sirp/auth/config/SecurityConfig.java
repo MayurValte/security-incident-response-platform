@@ -1,6 +1,7 @@
 package com.sirp.auth.config;
 
 import com.sirp.auth.security.CustomUserDetailsService;
+import com.sirp.security.filter.CorrelationIdFilter;
 import com.sirp.security.filter.JwtAuthenticationFilter;
 import com.sirp.security.handler.RestAccessDeniedHandler;
 import com.sirp.security.handler.RestAuthenticationEntryPoint;
@@ -39,6 +40,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CorrelationIdFilter correlationIdFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
 
@@ -69,6 +71,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(correlationIdFilter, JwtAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/refresh", "/swagger-ui/**",
                                 "/swagger-ui.html", "/v3/api-docs/**", "/actuator/health", "/actuator/prometheus")
