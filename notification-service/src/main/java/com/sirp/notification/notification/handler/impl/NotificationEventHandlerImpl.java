@@ -146,8 +146,38 @@ public class NotificationEventHandlerImpl implements NotificationEventHandler {
                                                 .subject(subject)
                                                 .message(message)
                                                 .createdAt(Instant.now())
-                                                .build(), saved = notificationRepository.save(notification);
-        notificationDispatcher.dispatch(saved);
-        log.info("Notification {} created for {} via {}", saved.getId(), recipientId, channel);
+                                                .build();
+        Notification saved = notificationRepository.save(notification);
+        dispatchAndRecordOutcome(saved, recipientId, channel);
+    }
+
+    /**
+     * Dispatch failures (e.g. a transient SMTP error) are deliberately
+     * NOT rethrown here. The caller's existsByEventIdAndChannel guard
+     * means a Kafka-level redelivery retry (see KafkaErrorHandlingConfig)
+     * would find this row already persisted and skip straight past it
+     * without ever calling dispatch() again - so letting a dispatch
+     * failure propagate up to the @KafkaListener would trigger a retry
+     * that can never actually retry the thing that failed. Recording
+     * FAILED here instead keeps the listener-level retry/DLT policy
+     * meaningful for what it can actually fix (the DB/lookup steps
+     * before this point), while a failed send needs its own remediation
+     * (a re-send job or admin action against FAILED rows) rather than
+     * Kafka redelivery.
+     */
+    private void dispatchAndRecordOutcome(Notification saved, UUID recipientId, NotificationChannel channel) {
+        try {
+            notificationDispatcher.dispatch(saved);
+            saved.setStatus(NotificationStatus.SENT);
+            saved.setSentAt(Instant.now());
+            log.info("Notification {} sent to {} via {}", saved.getId(), recipientId, channel);
+        } catch (Exception ex) {
+            saved.setStatus(NotificationStatus.FAILED);
+            saved.setFailureReason(ex.getMessage());
+            log.error("Notification {} failed to send to {} via {}: {}", saved.getId(), recipientId, channel,
+                ex.toString());
+        } finally {
+            notificationRepository.save(saved);
+        }
     }
 }

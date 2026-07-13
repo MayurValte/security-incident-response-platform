@@ -55,6 +55,17 @@ spring:
 
         spring.json.trusted.packages: "*"
 
+    # audit-service is otherwise a pure Kafka consumer (see the topic
+    # catalog in CLAUDE.md) - this producer config exists only so
+    # KafkaErrorHandlingConfig's DeadLetterPublishingRecoverer has a
+    # working KafkaTemplate to republish exhausted-retry records to a
+    # per-service .DLT topic, not for any business-event publishing.
+    producer:
+
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
   cloud:
 
     consul:
