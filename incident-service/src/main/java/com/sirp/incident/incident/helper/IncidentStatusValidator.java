@@ -11,12 +11,12 @@ public class IncidentStatusValidator {
         switch (current) {
             case OPEN -> {
                 if (target != IncidentStatus.ACKNOWLEDGED) {
-                    throw new IllegalStateException();
+                    throw new InvalidStatusTransitionException(current.name(), target.name());
                 }
             }
             case ACKNOWLEDGED -> {
                 if (target != IncidentStatus.IN_PROGRESS) {
-                    throw new IllegalStateException();
+                    throw new InvalidStatusTransitionException(current.name(), target.name());
                 }
             }
             case IN_PROGRESS -> {
@@ -26,10 +26,10 @@ public class IncidentStatusValidator {
             }
             case RESOLVED -> {
                 if (target != IncidentStatus.CLOSED) {
-                    throw new IllegalStateException();
+                    throw new InvalidStatusTransitionException(current.name(), target.name());
                 }
             }
-            case CLOSED -> throw new IllegalStateException();
+            case CLOSED -> throw new InvalidStatusTransitionException(current.name(), target.name());
         }
     }
 }

@@ -16,6 +16,9 @@ public interface IncidentServiceClient {
     IncidentResponse assignIncident(@PathVariable UUID id,
         @RequestBody AssignIncidentRequest request);
 
+    @PutMapping("/internal/incidents/{id}/start")
+    IncidentResponse startIncident(@PathVariable UUID id);
+
     @PutMapping("/internal/incidents/{id}/resolve")
     IncidentResponse resolveIncident(@PathVariable UUID id,
         @RequestBody ResolveIncidentRequest request);

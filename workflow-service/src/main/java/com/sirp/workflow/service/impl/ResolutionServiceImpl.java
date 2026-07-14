@@ -15,14 +15,15 @@ import com.sirp.workflow.kafka.producer.WorkflowEventProducer;
 import com.sirp.workflow.mapper.WorkflowMapper;
 import com.sirp.workflow.repository.WorkflowRepository;
 import com.sirp.workflow.service.ResolutionService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ResolutionServiceImpl implements ResolutionService {
 
     private static final Set<WorkflowStatus> TERMINAL_STATUSES =
-        Set.of(WorkflowStatus.RESOLVED, WorkflowStatus.CLOSED);
+            Set.of(WorkflowStatus.RESOLVED, WorkflowStatus.CLOSED);
 
     private final WorkflowRepository repository;
     private final WorkflowMapper mapper;
@@ -42,7 +43,7 @@ public class ResolutionServiceImpl implements ResolutionService {
         WorkflowEntity entity = findOrThrow(workflowId);
         if (TERMINAL_STATUSES.contains(entity.getWorkflowStatus())) {
             throw new InvalidWorkflowStateException(
-                "Cannot resolve workflow " + workflowId + " in terminal state " + entity.getWorkflowStatus());
+                    "Cannot resolve workflow " + workflowId + " in terminal state " + entity.getWorkflowStatus());
         }
 
         Instant now = Instant.now();
@@ -51,12 +52,13 @@ public class ResolutionServiceImpl implements ResolutionService {
         entity.setWorkflowStatus(WorkflowStatus.RESOLVED);
         WorkflowEntity saved = repository.save(entity);
 
+        incidentServiceClient.startIncident(saved.getIncidentId());
         incidentServiceClient.resolveIncident(saved.getIncidentId(), new ResolveIncidentRequest(request.remarks()));
 
         UUID effectiveActor = actorId != null ? actorId : saved.getAssignedTo();
         producer.publishWorkflowResolved(new WorkflowResolvedEvent(UUID.randomUUID(), saved.getId(),
-                                                                    saved.getIncidentId(), effectiveActor,
-                                                                    toLocalDateTime(now), request.remarks()));
+                saved.getIncidentId(), effectiveActor,
+                toLocalDateTime(now), request.remarks()));
 
         return mapper.toResponse(saved);
     }
@@ -66,8 +68,8 @@ public class ResolutionServiceImpl implements ResolutionService {
         WorkflowEntity entity = findOrThrow(workflowId);
         if (entity.getWorkflowStatus() != WorkflowStatus.RESOLVED) {
             throw new InvalidWorkflowStateException(
-                "Workflow " + workflowId + " must be RESOLVED before it can be closed (current state: "
-                    + entity.getWorkflowStatus() + ")");
+                    "Workflow " + workflowId + " must be RESOLVED before it can be closed (current state: "
+                            + entity.getWorkflowStatus() + ")");
         }
 
         Instant now = Instant.now();
@@ -80,15 +82,15 @@ public class ResolutionServiceImpl implements ResolutionService {
 
         UUID effectiveActor = actorId != null ? actorId : saved.getAssignedTo();
         producer.publishWorkflowClosed(
-            new WorkflowClosedEvent(UUID.randomUUID(), saved.getId(), saved.getIncidentId(), effectiveActor,
-                                    toLocalDateTime(now)));
+                new WorkflowClosedEvent(UUID.randomUUID(), saved.getId(), saved.getIncidentId(), effectiveActor,
+                        toLocalDateTime(now)));
 
         return mapper.toResponse(saved);
     }
 
     private WorkflowEntity findOrThrow(UUID workflowId) {
         return repository.findById(workflowId)
-                         .orElseThrow(() -> new WorkflowNotFoundException("Workflow not found: " + workflowId));
+                .orElseThrow(() -> new WorkflowNotFoundException("Workflow not found: " + workflowId));
     }
 
     private LocalDateTime toLocalDateTime(Instant instant) {

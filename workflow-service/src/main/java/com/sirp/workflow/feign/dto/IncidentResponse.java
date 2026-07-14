@@ -2,42 +2,42 @@ package com.sirp.workflow.feign.dto;
 
 import com.sirp.common.enums.IncidentPriority;
 import com.sirp.common.enums.IncidentSeverity;
-import com.sirp.common.enums.IncidentStatus;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public record IncidentResponse(
 
-    UUID id,
+        UUID id,
 
-    String incidentNumber,
+        String incidentNumber,
 
-    String title,
+        String title,
 
-    String description,
+        String description,
 
-    IncidentStatus status,
+        String status,
 
-    IncidentSeverity severity,
+        IncidentSeverity severity,
 
-    IncidentPriority priority,
+        IncidentPriority priority,
 
-    UUID createdBy,
+        UUID createdBy,
 
-    UUID assignedTo,
+        UUID assignedTo,
 
-    UUID teamId,
+        UUID teamId,
 
-    Instant createdAt,
+        Instant createdAt,
 
-    Instant updatedAt,
+        Instant updatedAt,
 
-    Instant resolvedAt,
+        Instant resolvedAt,
 
-    Instant closedAt,
+        Instant closedAt,
 
-    List<CommentResponse> comments
+        List<CommentResponse> comments
 
 ) {
 
