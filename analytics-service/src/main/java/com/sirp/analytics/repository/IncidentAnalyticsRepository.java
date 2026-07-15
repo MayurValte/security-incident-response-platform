@@ -21,9 +21,9 @@ public interface IncidentAnalyticsRepository extends JpaRepository<IncidentAnaly
     @Query("""
         select new com.sirp.analytics.dto.response.AnalyticsSummaryResponse(
             count(r),
-            sum(case when r.assignedAt is not null then 1L else 0L end),
-            sum(case when r.resolvedAt is not null then 1L else 0L end),
-            sum(case when r.closedAt is not null then 1L else 0L end),
+            coalesce(sum(case when r.assignedAt is not null then 1L else 0L end), 0L),
+            coalesce(sum(case when r.resolvedAt is not null then 1L else 0L end), 0L),
+            coalesce(sum(case when r.closedAt is not null then 1L else 0L end), 0L),
             avg(r.resolutionMinutes)
         )
         from IncidentAnalyticsRecord r

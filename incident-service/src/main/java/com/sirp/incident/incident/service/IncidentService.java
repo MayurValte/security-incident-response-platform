@@ -1,12 +1,18 @@
 package com.sirp.incident.incident.service;
 
+import com.sirp.incident.incident.dto.request.AddCommentRequest;
 import com.sirp.incident.incident.dto.request.AssignIncidentRequest;
 import com.sirp.incident.incident.dto.request.CreateIncidentRequest;
 import com.sirp.incident.incident.dto.request.ResolveIncidentRequest;
 import com.sirp.incident.incident.dto.request.UpdateIncidentRequest;
+import com.sirp.incident.incident.dto.response.AttachmentFile;
+import com.sirp.incident.incident.dto.response.AttachmentResponse;
+import com.sirp.incident.incident.dto.response.CommentResponse;
 import com.sirp.incident.incident.dto.response.IncidentPageResponse;
 import com.sirp.incident.incident.dto.response.IncidentResponse;
+import java.util.List;
 import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface IncidentService {
 
@@ -31,4 +37,12 @@ public interface IncidentService {
     IncidentResponse closeIncident(UUID id, UUID actorId);
 
     IncidentResponse startIncident(UUID id, UUID actorId);
+
+    CommentResponse addComment(UUID id, AddCommentRequest request, UUID actorId);
+
+    AttachmentResponse uploadAttachment(UUID id, MultipartFile file, UUID actorId);
+
+    List<AttachmentResponse> listAttachments(UUID id);
+
+    AttachmentFile downloadAttachment(UUID id, UUID attachmentId);
 }

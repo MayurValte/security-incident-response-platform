@@ -18,6 +18,15 @@ spring:
     config:
       fail-fast: true
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
 # PUBLIC key only - this service verifies tokens, never issues them.
 jwt:
   public-key: ${JWT_PUBLIC_KEY}
+
+incident:
+  attachment:
+    storage-dir: ${ATTACHMENT_STORAGE_DIR:./attachment-storage}

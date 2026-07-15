@@ -12,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -91,6 +92,25 @@ public class GlobalExceptionHandler {
                                                    request.getRequestURI(), ErrorCode.INVALID_TRANSITION.name(),
                                                    List.of());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(AttachmentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAttachmentNotFound(AttachmentNotFoundException ex,
+        HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(Instant.now(), 404, "Not Found", ex.getMessage(),
+                                                   request.getRequestURI(), ErrorCode.ATTACHMENT_NOT_FOUND.name(),
+                                                   List.of());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException ex,
+        HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(Instant.now(), 400, "Bad Request",
+                                                   "Attachment exceeds the maximum allowed file size",
+                                                   request.getRequestURI(), ErrorCode.FILE_TOO_LARGE.name(),
+                                                   List.of());
+        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(Exception.class)

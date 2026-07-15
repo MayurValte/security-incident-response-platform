@@ -40,6 +40,11 @@ public class ResilientIncidentServiceClient {
     }
 
     private IncidentResponse assignIncidentFallback(UUID id, AssignIncidentRequest request, Throwable t) {
+        if (t instanceof FeignException.Conflict) {
+            log.warn("incident-service rejected assignIncident({}) as an invalid transition, "
+                    + "assuming the incident has already moved past the assignable stage: {}", id, t.toString());
+            return null;
+        }
         log.error("incident-service circuit breaker fallback for assignIncident({}): {}", id, t.toString());
         throw new IncidentServiceUnavailableException("Incident Service unavailable", t);
     }
