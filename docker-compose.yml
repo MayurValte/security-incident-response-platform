@@ -31,10 +31,24 @@ services:
       POSTGRES_PASSWORD: postgres
 
     ports:
-      - "5432:5432"
+      # 5432 is taken by a native PostgreSQL Windows service on this host -
+      # published on 5433 instead so host-side clients (DBeaver, psql, etc.)
+      # don't silently hit that native instance. Containers on the compose
+      # network are unaffected - they always reach this via "postgres:5432".
+      - "5433:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Runs once on first boot against a fresh volume - creates the
+      # per-service databases CLAUDE.md previously said had to be created
+      # by hand (POSTGRES_DB only creates the single "sirp" database).
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
     restart: unless-stopped
 
@@ -202,6 +216,308 @@ services:
     restart: unless-stopped
 
 
+  # --- App services ---------------------------------------------------
+  # config-server has no infra dependency of its own (native profile,
+  # serves classpath:/config with no DB/Kafka/Consul) - it's a hard
+  # dependency for every other service, though (spring.config.import has
+  # no optional: prefix, fail-fast: true), so it gets a real healthcheck
+  # and every other service waits on service_healthy rather than just
+  # service_started.
+  config-server:
+
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+
+    container_name: sirp-config-server
+
+    ports:
+      - "8888:8888"
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+    restart: unless-stopped
+
+  api-gateway:
+
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+
+    container_name: sirp-api-gateway
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      CONSUL_HOST: consul
+      REDIS_HOST: redis
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOKI_PUSH_URL: http://loki:3100/loki/api/v1/push
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      AUTH_SERVICE_URL: http://auth-service:8082
+      USER_SERVICE_URL: http://user-service:8081
+      INCIDENT_SERVICE_URL: http://incident-service:8083
+      WORKFLOW_SERVICE_URL: http://workflow-service:8086
+      ANALYTICS_SERVICE_URL: http://analytics-service:8087
+      AUDIT_SERVICE_URL: http://audit-service:8084
+      NOTIFICATION_SERVICE_URL: http://notification-service:8085
+
+    depends_on:
+      config-server:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+    restart: unless-stopped
+
+  auth-service:
+
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+
+    container_name: sirp-auth-service
+
+    ports:
+      - "8082:8082"
+
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: sirp-kafka:9092
+      CONSUL_HOST: consul
+      REDIS_HOST: redis
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOKI_PUSH_URL: http://loki:3100/loki/api/v1/push
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+      redis:
+        condition: service_started
+
+    restart: unless-stopped
+
+  user-service:
+
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+
+    container_name: sirp-user-service
+
+    ports:
+      - "8081:8081"
+
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: sirp-kafka:9092
+      CONSUL_HOST: consul
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOKI_PUSH_URL: http://loki:3100/loki/api/v1/push
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+
+    restart: unless-stopped
+
+  incident-service:
+
+    build:
+      context: .
+      dockerfile: incident-service/Dockerfile
+
+    container_name: sirp-incident-service
+
+    ports:
+      - "8083:8083"
+
+    volumes:
+      - incident_attachments:/app/attachment-storage
+
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: sirp-kafka:9092
+      CONSUL_HOST: consul
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOKI_PUSH_URL: http://loki:3100/loki/api/v1/push
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+
+    restart: unless-stopped
+
+  audit-service:
+
+    build:
+      context: .
+      dockerfile: audit-service/Dockerfile
+
+    container_name: sirp-audit-service
+
+    ports:
+      - "8084:8084"
+
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: sirp-kafka:9092
+      CONSUL_HOST: consul
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOKI_PUSH_URL: http://loki:3100/loki/api/v1/push
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+
+    restart: unless-stopped
+
+  notification-service:
+
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+
+    container_name: sirp-notification-service
+
+    ports:
+      - "8085:8085"
+
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: sirp-kafka:9092
+      CONSUL_HOST: consul
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOKI_PUSH_URL: http://loki:3100/loki/api/v1/push
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      # Recipients open this from their own host browser, not from inside
+      # the Docker network - stays localhost even here, see
+      # NotificationEventHandlerImpl.
+      APP_PUBLIC_BASE_URL: http://localhost:8080
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+
+    restart: unless-stopped
+
+  workflow-service:
+
+    build:
+      context: .
+      dockerfile: workflow-service/Dockerfile
+
+    container_name: sirp-workflow-service
+
+    ports:
+      - "8086:8086"
+
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: sirp-kafka:9092
+      CONSUL_HOST: consul
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOKI_PUSH_URL: http://loki:3100/loki/api/v1/push
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+
+    restart: unless-stopped
+
+  analytics-service:
+
+    build:
+      context: .
+      dockerfile: analytics-service/Dockerfile
+
+    container_name: sirp-analytics-service
+
+    ports:
+      - "8087:8087"
+
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: sirp-kafka:9092
+      CONSUL_HOST: consul
+      REDIS_HOST: redis
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOKI_PUSH_URL: http://loki:3100/loki/api/v1/push
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+      redis:
+        condition: service_started
+
+    restart: unless-stopped
+
+
 volumes:
 
   postgres_data:
@@ -209,3 +525,5 @@ volumes:
   loki_data:
 
   grafana_data:
+
+  incident_attachments:

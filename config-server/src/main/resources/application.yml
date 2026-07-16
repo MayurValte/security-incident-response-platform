@@ -21,6 +21,9 @@ spring:
 
             classpath:/config
 
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+
 management:
   metrics:
     tags:

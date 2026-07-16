@@ -13,7 +13,7 @@ spring:
   # Config Server is REQUIRED - if it's unreachable at startup, this
   # service must fail fast rather than boot on stale/missing config.
   config:
-    import: configserver:http://localhost:8888
+    import: "configserver:${CONFIG_SERVER_URI:http://localhost:8888}"
 
   cloud:
 
@@ -23,3 +23,6 @@ spring:
 # PUBLIC key only - this service verifies tokens, never issues them.
 jwt:
   public-key: ${JWT_PUBLIC_KEY}
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}

@@ -4,7 +4,7 @@ spring:
     name: audit-service
 
   config:
-    import: configserver:http://localhost:8888
+    import: "configserver:${CONFIG_SERVER_URI:http://localhost:8888}"
 
   cloud:
     config:
@@ -23,3 +23,6 @@ logging:
 # PUBLIC key only - this service verifies tokens, never issues them.
 jwt:
   public-key: ${JWT_PUBLIC_KEY}
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}

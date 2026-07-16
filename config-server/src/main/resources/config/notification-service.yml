@@ -4,9 +4,9 @@ server:
 spring:
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/sirp_notification_db
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/sirp_notification_db
     username: postgres
-    password: root
+    password: postgres
 
   jpa:
 
@@ -29,7 +29,7 @@ spring:
 
   kafka:
 
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
 
     consumer:
 
@@ -68,7 +68,7 @@ spring:
 
     consul:
 
-      host: localhost
+      host: ${CONSUL_HOST:localhost}
 
       port: 8500
 
@@ -167,7 +167,7 @@ management:
 
     tracing:
 
-      endpoint: http://localhost:9411/api/v2/spans
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
 
   endpoint:
 

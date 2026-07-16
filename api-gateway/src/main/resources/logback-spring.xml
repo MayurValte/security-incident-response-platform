@@ -5,6 +5,7 @@
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
     <springProperty scope="context" name="appName" source="spring.application.name"/>
+    <springProperty scope="context" name="lokiPushUrl" source="loki.push-url"/>
 
     <!--
         Pushes directly to Loki over HTTP rather than tailing a log file -
@@ -29,7 +30,7 @@
         -->
         <batchTimeout>2000</batchTimeout>
         <http>
-            <url>http://localhost:3100/loki/api/v1/push</url>
+            <url>${lokiPushUrl}</url>
         </http>
         <format>
             <label>

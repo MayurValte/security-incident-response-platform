@@ -11,7 +11,7 @@ spring:
     name: notification-service
 
   config:
-    import: configserver:http://localhost:8888
+    import: "configserver:${CONFIG_SERVER_URI:http://localhost:8888}"
 
   cloud:
 
@@ -21,3 +21,13 @@ spring:
 # PUBLIC key only - this service verifies tokens, never issues them.
 jwt:
   public-key: ${JWT_PUBLIC_KEY}
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+
+# Public base URL for links embedded in outgoing emails (e.g. "view incident").
+# Deliberately NOT container-network-aware even when this service runs in
+# Docker - the recipient opens this link from their own host browser, not
+# from inside the Docker network.
+app:
+  public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}

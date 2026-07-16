@@ -3,7 +3,7 @@ spring:
     name: workflow-service
 
   config:
-    import: configserver:http://localhost:8888
+    import: "configserver:${CONFIG_SERVER_URI:http://localhost:8888}"
 
   cloud:
     config:
@@ -13,6 +13,9 @@ logging:
   level:
     root: INFO
     com.sirp.workflow: DEBUG
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
 
 springdoc:
   api-docs:

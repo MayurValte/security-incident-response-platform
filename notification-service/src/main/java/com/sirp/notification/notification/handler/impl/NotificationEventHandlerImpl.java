@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,9 @@ public class NotificationEventHandlerImpl implements NotificationEventHandler {
     private final ResilientUserClient userClient;
     private final EmailTemplateRenderer renderer;
 
+    @Value("${app.public-base-url}")
+    private String publicBaseUrl;
+
     @Override
     public void handleIncidentCreated(IncidentCreatedEvent event) {
         IncidentEmailModel model = new IncidentEmailModel(event.incidentNumber(),
@@ -43,7 +47,7 @@ public class NotificationEventHandlerImpl implements NotificationEventHandler {
                                                           "OPEN",
                                                           event.createdBy().toString(),
                                                           event.occurredAt(),
-                                                          "http://localhost:8080/api/v1/incidents/" +
+                                                          publicBaseUrl + "/api/v1/incidents/" +
                                                               event.incidentId());
 
         String html = renderer.renderIncidentCreated(model);
@@ -61,7 +65,7 @@ public class NotificationEventHandlerImpl implements NotificationEventHandler {
                                                           "ACKNOWLEDGED",
                                                           event.assignedBy().toString(),
                                                           event.occurredAt(),
-                                                          "http://localhost:8080/api/v1/incidents/" +
+                                                          publicBaseUrl + "/api/v1/incidents/" +
                                                               event.incidentId());
 
         String html = renderer.renderIncidentAssigned(model);
@@ -79,7 +83,7 @@ public class NotificationEventHandlerImpl implements NotificationEventHandler {
                                                           "RESOLVED",
                                                           event.resolvedBy().toString(),
                                                           event.occurredAt(),
-                                                          "http://localhost:8080/api/v1/incidents/" +
+                                                          publicBaseUrl + "/api/v1/incidents/" +
                                                               event.incidentId());
 
         String html = renderer.renderIncidentResolved(model);
@@ -97,7 +101,7 @@ public class NotificationEventHandlerImpl implements NotificationEventHandler {
                                                           "CLOSED",
                                                           event.closedBy().toString(),
                                                           event.occurredAt(),
-                                                          "http://localhost:8080/api/v1/incidents/" +
+                                                          publicBaseUrl + "/api/v1/incidents/" +
                                                               event.incidentId());
 
         String html = renderer.renderIncidentClosed(model);
