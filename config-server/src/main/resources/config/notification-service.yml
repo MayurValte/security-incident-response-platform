@@ -151,6 +151,12 @@ resilience4j:
 # production default - see that section for the reasoning.
 management:
 
+  metrics:
+
+    tags:
+
+      application: ${spring.application.name}
+
   tracing:
 
     sampling:

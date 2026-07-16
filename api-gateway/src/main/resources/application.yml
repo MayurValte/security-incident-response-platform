@@ -30,6 +30,9 @@ cors:
   allowed-origins: http://localhost:3000,http://localhost:5173,http://localhost:4200
 
 management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
   tracing:
     sampling:
       probability: 1.0

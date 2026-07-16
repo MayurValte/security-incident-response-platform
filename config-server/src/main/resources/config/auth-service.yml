@@ -147,6 +147,12 @@ resilience4j:
 
 management:
 
+  metrics:
+
+    tags:
+
+      application: ${spring.application.name}
+
   tracing:
 
     sampling:

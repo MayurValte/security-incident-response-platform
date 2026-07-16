@@ -67,6 +67,9 @@ server:
   port: 8081
 
 management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
   tracing:
     sampling:
       probability: 1.0
