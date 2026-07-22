@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.sirp.audit.audit.dto.response.AuditPageResponse;
 import com.sirp.audit.audit.dto.response.AuditResponse;
 import com.sirp.audit.audit.dto.response.AuditSummaryResponse;
 import com.sirp.audit.audit.entity.AggregateType;
@@ -16,6 +15,7 @@ import com.sirp.audit.audit.entity.AuditEventType;
 import com.sirp.audit.audit.exception.AuditNotFoundException;
 import com.sirp.audit.audit.exception.GlobalExceptionHandler;
 import com.sirp.audit.audit.service.AuditService;
+import com.sirp.common.dto.PageResponse;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -74,7 +74,7 @@ class AuditControllerTest {
             aggregateId, AggregateType.INCIDENT, AuditEventType.INCIDENT_CREATED, "incident-service", null,
             Instant.now());
         when(auditService.getByAggregateId(eq(aggregateId), eq(0), eq(20)))
-            .thenReturn(new AuditPageResponse(List.of(summary), 0, 20, 1L, 1, true, true));
+            .thenReturn(new PageResponse<>(List.of(summary), 0, 20, 1L, 1, true, true));
 
         mockMvc.perform(get("/api/v1/audits/aggregate/{aggregateId}", aggregateId))
             .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class AuditControllerTest {
     void getByAggregate_honorsExplicitPageAndSize() throws Exception {
         UUID aggregateId = UUID.randomUUID();
         when(auditService.getByAggregateId(eq(aggregateId), eq(2), eq(5)))
-            .thenReturn(new AuditPageResponse(List.of(), 2, 5, 0L, 0, false, true));
+            .thenReturn(new PageResponse<>(List.of(), 2, 5, 0L, 0, false, true));
 
         mockMvc.perform(get("/api/v1/audits/aggregate/{aggregateId}", aggregateId)
                 .param("page", "2")
@@ -100,7 +100,7 @@ class AuditControllerTest {
     void getByPerformedBy_returns200() throws Exception {
         UUID performedBy = UUID.randomUUID();
         when(auditService.getByPerformedBy(eq(performedBy), eq(0), eq(20)))
-            .thenReturn(new AuditPageResponse(List.of(), 0, 20, 0L, 0, true, true));
+            .thenReturn(new PageResponse<>(List.of(), 0, 20, 0L, 0, true, true));
 
         mockMvc.perform(get("/api/v1/audits/user/{performedBy}", performedBy))
             .andExpect(status().isOk());
@@ -109,7 +109,7 @@ class AuditControllerTest {
     @Test
     void getByEventType_parsesPathVariableAsEnum() throws Exception {
         when(auditService.getByEventType(eq(AuditEventType.LOGIN_FAILED), eq(0), eq(20)))
-            .thenReturn(new AuditPageResponse(List.of(), 0, 20, 0L, 0, true, true));
+            .thenReturn(new PageResponse<>(List.of(), 0, 20, 0L, 0, true, true));
 
         mockMvc.perform(get("/api/v1/audits/event-type/{eventType}", "LOGIN_FAILED"))
             .andExpect(status().isOk());
@@ -121,7 +121,7 @@ class AuditControllerTest {
         UUID performedBy = UUID.randomUUID();
         when(auditService.search(eq(aggregateId), eq(AggregateType.INCIDENT), eq(AuditEventType.INCIDENT_CREATED),
             eq(performedBy), any(Instant.class), any(Instant.class), eq(0), eq(20)))
-            .thenReturn(new AuditPageResponse(List.of(), 0, 20, 0L, 0, true, true));
+            .thenReturn(new PageResponse<>(List.of(), 0, 20, 0L, 0, true, true));
 
         mockMvc.perform(get("/api/v1/audits")
                 .param("aggregateId", aggregateId.toString())
@@ -136,7 +136,7 @@ class AuditControllerTest {
     @Test
     void search_defaultsAllFiltersToNullWhenOmitted() throws Exception {
         when(auditService.search(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(0), eq(20)))
-            .thenReturn(new AuditPageResponse(List.of(), 0, 20, 0L, 0, true, true));
+            .thenReturn(new PageResponse<>(List.of(), 0, 20, 0L, 0, true, true));
 
         mockMvc.perform(get("/api/v1/audits"))
             .andExpect(status().isOk());

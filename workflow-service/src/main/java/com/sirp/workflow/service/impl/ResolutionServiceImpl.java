@@ -8,20 +8,18 @@ import com.sirp.workflow.dto.request.ResolveWorkflowRequest;
 import com.sirp.workflow.dto.response.WorkflowResponse;
 import com.sirp.workflow.entity.WorkflowEntity;
 import com.sirp.workflow.exception.InvalidWorkflowStateException;
-import com.sirp.workflow.exception.WorkflowNotFoundException;
 import com.sirp.workflow.feign.ResilientIncidentServiceClient;
 import com.sirp.workflow.feign.dto.ResolveIncidentRequest;
 import com.sirp.workflow.kafka.producer.WorkflowEventProducer;
 import com.sirp.workflow.mapper.WorkflowMapper;
 import com.sirp.workflow.repository.WorkflowRepository;
 import com.sirp.workflow.service.ResolutionService;
+import com.sirp.workflow.util.WorkflowLookup;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,7 +38,7 @@ public class ResolutionServiceImpl implements ResolutionService {
 
     @Override
     public WorkflowResponse resolveWorkflow(UUID workflowId, ResolveWorkflowRequest request, UUID actorId) {
-        WorkflowEntity entity = findOrThrow(workflowId);
+        WorkflowEntity entity = WorkflowLookup.findOrThrow(repository, workflowId);
         if (TERMINAL_STATUSES.contains(entity.getWorkflowStatus())) {
             throw new InvalidWorkflowStateException(
                     "Cannot resolve workflow " + workflowId + " in terminal state " + entity.getWorkflowStatus());
@@ -58,14 +56,14 @@ public class ResolutionServiceImpl implements ResolutionService {
         UUID effectiveActor = actorId != null ? actorId : saved.getAssignedTo();
         producer.publishWorkflowResolved(new WorkflowResolvedEvent(UUID.randomUUID(), saved.getId(),
                 saved.getIncidentId(), effectiveActor,
-                toLocalDateTime(now), request.remarks()));
+                WorkflowLookup.toLocalDateTime(now), request.remarks()));
 
         return mapper.toResponse(saved);
     }
 
     @Override
     public WorkflowResponse closeWorkflow(UUID workflowId, CloseWorkflowRequest request, UUID actorId) {
-        WorkflowEntity entity = findOrThrow(workflowId);
+        WorkflowEntity entity = WorkflowLookup.findOrThrow(repository, workflowId);
         if (entity.getWorkflowStatus() != WorkflowStatus.RESOLVED) {
             throw new InvalidWorkflowStateException(
                     "Workflow " + workflowId + " must be RESOLVED before it can be closed (current state: "
@@ -83,17 +81,9 @@ public class ResolutionServiceImpl implements ResolutionService {
         UUID effectiveActor = actorId != null ? actorId : saved.getAssignedTo();
         producer.publishWorkflowClosed(
                 new WorkflowClosedEvent(UUID.randomUUID(), saved.getId(), saved.getIncidentId(), effectiveActor,
-                        toLocalDateTime(now)));
+                        WorkflowLookup.toLocalDateTime(now)));
 
         return mapper.toResponse(saved);
     }
 
-    private WorkflowEntity findOrThrow(UUID workflowId) {
-        return repository.findById(workflowId)
-                .orElseThrow(() -> new WorkflowNotFoundException("Workflow not found: " + workflowId));
-    }
-
-    private LocalDateTime toLocalDateTime(Instant instant) {
-        return instant == null ? null : LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
-    }
 }

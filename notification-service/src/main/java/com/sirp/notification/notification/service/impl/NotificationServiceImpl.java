@@ -1,8 +1,8 @@
 package com.sirp.notification.notification.service.impl;
 
+import com.sirp.common.dto.PageResponse;
 import com.sirp.notification.exception.NotificationNotFoundException;
 import com.sirp.notification.notification.dto.request.NotificationSearchRequest;
-import com.sirp.notification.notification.dto.response.NotificationPageResponse;
 import com.sirp.notification.notification.dto.response.NotificationResponse;
 import com.sirp.notification.notification.entity.Notification;
 import com.sirp.notification.notification.mapper.NotificationMapper;
@@ -41,7 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationPageResponse searchNotifications(
+    public PageResponse<NotificationResponse> searchNotifications(
         Integer page,
         Integer size,
         NotificationSearchRequest request) {
@@ -87,7 +87,7 @@ public class NotificationServiceImpl implements NotificationService {
                          .map(notificationMapper::toResponse)
                          .toList();
 
-        return new NotificationPageResponse(
+        return new PageResponse<>(
 
             responses,
 

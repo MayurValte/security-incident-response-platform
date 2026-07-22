@@ -1,9 +1,9 @@
 package com.sirp.audit.audit.mapper;
 
-import com.sirp.audit.audit.dto.response.AuditPageResponse;
 import com.sirp.audit.audit.dto.response.AuditResponse;
 import com.sirp.audit.audit.dto.response.AuditSummaryResponse;
 import com.sirp.audit.audit.entity.AuditEvent;
+import com.sirp.common.dto.PageResponse;
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 
@@ -14,9 +14,9 @@ public interface AuditMapper {
 
   AuditSummaryResponse toSummary(AuditEvent auditEvent);
 
-  default AuditPageResponse toPageResponse(Page<AuditEvent> page) {
+  default PageResponse<AuditSummaryResponse> toPageResponse(Page<AuditEvent> page) {
 
-    return new AuditPageResponse(
+    return new PageResponse<>(
 
         page.getContent()
             .stream()

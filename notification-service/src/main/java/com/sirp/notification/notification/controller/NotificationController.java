@@ -1,7 +1,7 @@
 package com.sirp.notification.notification.controller;
 
+import com.sirp.common.dto.PageResponse;
 import com.sirp.notification.notification.dto.request.NotificationSearchRequest;
-import com.sirp.notification.notification.dto.response.NotificationPageResponse;
 import com.sirp.notification.notification.dto.response.NotificationResponse;
 import com.sirp.notification.notification.enums.NotificationChannel;
 import com.sirp.notification.notification.enums.NotificationStatus;
@@ -33,7 +33,8 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<NotificationPageResponse> searchNotifications(@RequestParam(defaultValue = "0") Integer page,
+    public ResponseEntity<PageResponse<NotificationResponse>> searchNotifications(
+        @RequestParam(defaultValue = "0") Integer page,
         @RequestParam(defaultValue = "10") Integer size,
         @RequestParam(required = false) UUID incidentId,
         @RequestParam(required = false) UUID recipientId,

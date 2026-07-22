@@ -5,11 +5,12 @@ import com.sirp.incident.incident.dto.request.AssignIncidentRequest;
 import com.sirp.incident.incident.dto.request.CreateIncidentRequest;
 import com.sirp.incident.incident.dto.request.ResolveIncidentRequest;
 import com.sirp.incident.incident.dto.request.UpdateIncidentRequest;
+import com.sirp.common.dto.PageResponse;
 import com.sirp.incident.incident.dto.response.AttachmentFile;
 import com.sirp.incident.incident.dto.response.AttachmentResponse;
 import com.sirp.incident.incident.dto.response.CommentResponse;
-import com.sirp.incident.incident.dto.response.IncidentPageResponse;
 import com.sirp.incident.incident.dto.response.IncidentResponse;
+import com.sirp.incident.incident.dto.response.IncidentSummaryResponse;
 import com.sirp.incident.incident.service.IncidentService;
 import com.sirp.security.model.JwtUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,7 +59,8 @@ public class IncidentController {
 
     @Operation(summary = "Search Incidents")
     @GetMapping
-    public ResponseEntity<IncidentPageResponse> searchIncidents(@RequestParam(defaultValue = "0") Integer page,
+    public ResponseEntity<PageResponse<IncidentSummaryResponse>> searchIncidents(
+        @RequestParam(defaultValue = "0") Integer page,
         @RequestParam(defaultValue = "20") Integer size,
         @RequestParam(required = false) String status,
         @RequestParam(required = false) String severity,

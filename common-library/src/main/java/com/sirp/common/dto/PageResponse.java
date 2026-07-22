@@ -1,10 +1,10 @@
-package com.sirp.incident.incident.dto.response;
+package com.sirp.common.dto;
 
 import java.util.List;
 
-public record IncidentPageResponse(
+public record PageResponse<T>(
 
-        List<IncidentSummaryResponse> content,
+        List<T> content,
 
         int page,
 
@@ -19,4 +19,5 @@ public record IncidentPageResponse(
         boolean last
 
 ) {
+
 }

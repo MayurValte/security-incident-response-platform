@@ -1,10 +1,11 @@
 package com.sirp.audit.audit.controller;
 
-import com.sirp.audit.audit.dto.response.AuditPageResponse;
 import com.sirp.audit.audit.dto.response.AuditResponse;
+import com.sirp.audit.audit.dto.response.AuditSummaryResponse;
 import com.sirp.audit.audit.entity.AggregateType;
 import com.sirp.audit.audit.entity.AuditEventType;
 import com.sirp.audit.audit.service.AuditService;
+import com.sirp.common.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
@@ -33,7 +34,7 @@ public class AuditController {
 
   @GetMapping("/aggregate/{aggregateId}")
   @Operation(summary = "Get audit events by aggregate id")
-  public AuditPageResponse getByAggregate(
+  public PageResponse<AuditSummaryResponse> getByAggregate(
       @PathVariable UUID aggregateId,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
@@ -42,7 +43,7 @@ public class AuditController {
 
   @GetMapping("/user/{performedBy}")
   @Operation(summary = "Get audit events by user")
-  public AuditPageResponse getByPerformedBy(
+  public PageResponse<AuditSummaryResponse> getByPerformedBy(
       @PathVariable UUID performedBy,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
@@ -51,7 +52,7 @@ public class AuditController {
 
   @GetMapping("/event-type/{eventType}")
   @Operation(summary = "Get audit events by event type")
-  public AuditPageResponse getByEventType(
+  public PageResponse<AuditSummaryResponse> getByEventType(
       @PathVariable AuditEventType eventType,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
@@ -60,7 +61,7 @@ public class AuditController {
 
   @GetMapping
   @Operation(summary = "Search audit events")
-  public AuditPageResponse search(
+  public PageResponse<AuditSummaryResponse> search(
       @RequestParam(required = false) UUID aggregateId,
       @RequestParam(required = false) AggregateType aggregateType,
       @RequestParam(required = false) AuditEventType eventType,

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sirp.common.dto.PageResponse;
 import com.sirp.common.enums.IncidentPriority;
 import com.sirp.common.enums.IncidentSeverity;
 import com.sirp.common.events.IncidentAssignedEvent;
@@ -26,7 +27,6 @@ import com.sirp.incident.incident.dto.request.UpdateIncidentRequest;
 import com.sirp.incident.incident.dto.response.AttachmentFile;
 import com.sirp.incident.incident.dto.response.AttachmentResponse;
 import com.sirp.incident.incident.dto.response.CommentResponse;
-import com.sirp.incident.incident.dto.response.IncidentPageResponse;
 import com.sirp.incident.incident.dto.response.IncidentResponse;
 import com.sirp.incident.incident.dto.response.IncidentSummaryResponse;
 import com.sirp.incident.incident.entity.Incident;
@@ -199,7 +199,8 @@ class IncidentServiceImplTest {
                 any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
             when(incidentMapper.toSummary(incident)).thenReturn(summary);
 
-            IncidentPageResponse result = incidentService.searchIncidents(0, 20, "open", "high", "p1");
+            PageResponse<IncidentSummaryResponse> result = incidentService.searchIncidents(0, 20, "open", "high",
+                "p1");
 
             assertThat(result.content()).containsExactly(summary);
             assertThat(result.totalElements()).isEqualTo(1);

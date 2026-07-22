@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sirp.audit.audit.dto.response.AuditPageResponse;
 import com.sirp.audit.audit.dto.response.AuditResponse;
 import com.sirp.audit.audit.dto.response.AuditSummaryResponse;
 import com.sirp.audit.audit.entity.AggregateType;
@@ -16,6 +15,7 @@ import com.sirp.audit.audit.entity.AuditEventType;
 import com.sirp.audit.audit.exception.AuditNotFoundException;
 import com.sirp.audit.audit.mapper.AuditMapper;
 import com.sirp.audit.audit.repository.AuditEventRepository;
+import com.sirp.common.dto.PageResponse;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -82,13 +82,13 @@ class AuditServiceImplTest {
         Page<AuditEvent> page = new PageImpl<>(List.of(event));
         AuditSummaryResponse summary = new AuditSummaryResponse(id, UUID.randomUUID(), aggregateId,
             AggregateType.INCIDENT, AuditEventType.INCIDENT_CREATED, "incident-service", null, Instant.now());
-        AuditPageResponse pageResponse = new AuditPageResponse(List.of(summary), 0, 20, 1L, 1, true, true);
+        PageResponse<AuditSummaryResponse> pageResponse = new PageResponse<>(List.of(summary), 0, 20, 1L, 1, true, true);
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         when(repository.findByAggregateId(eq(aggregateId), pageableCaptor.capture())).thenReturn(page);
         when(mapper.toPageResponse(page)).thenReturn(pageResponse);
 
-        AuditPageResponse result = auditService.getByAggregateId(aggregateId, 0, 20);
+        PageResponse<AuditSummaryResponse> result = auditService.getByAggregateId(aggregateId, 0, 20);
 
         assertThat(result).isEqualTo(pageResponse);
         assertThat(pageableCaptor.getValue().getPageNumber()).isEqualTo(0);
@@ -100,7 +100,7 @@ class AuditServiceImplTest {
     void getByPerformedByDelegatesToRepository() {
         UUID performedBy = UUID.randomUUID();
         Page<AuditEvent> page = new PageImpl<>(List.of());
-        AuditPageResponse pageResponse = new AuditPageResponse(List.of(), 0, 20, 0L, 0, true, true);
+        PageResponse<AuditSummaryResponse> pageResponse = new PageResponse<>(List.of(), 0, 20, 0L, 0, true, true);
         when(repository.findByPerformedBy(eq(performedBy), any(Pageable.class))).thenReturn(page);
         when(mapper.toPageResponse(page)).thenReturn(pageResponse);
 
@@ -110,7 +110,7 @@ class AuditServiceImplTest {
     @Test
     void getByEventTypeDelegatesToRepository() {
         Page<AuditEvent> page = new PageImpl<>(List.of());
-        AuditPageResponse pageResponse = new AuditPageResponse(List.of(), 0, 20, 0L, 0, true, true);
+        PageResponse<AuditSummaryResponse> pageResponse = new PageResponse<>(List.of(), 0, 20, 0L, 0, true, true);
         when(repository.findByEventType(eq(AuditEventType.LOGIN_FAILED), any(Pageable.class))).thenReturn(page);
         when(mapper.toPageResponse(page)).thenReturn(pageResponse);
 
@@ -120,12 +120,12 @@ class AuditServiceImplTest {
     @Test
     void searchCombinesAllFiltersIntoASingleSpecificationQuery() {
         Page<AuditEvent> page = new PageImpl<>(List.of());
-        AuditPageResponse pageResponse = new AuditPageResponse(List.of(), 0, 20, 0L, 0, true, true);
+        PageResponse<AuditSummaryResponse> pageResponse = new PageResponse<>(List.of(), 0, 20, 0L, 0, true, true);
         when(repository.findAll(org.mockito.ArgumentMatchers.<Specification<AuditEvent>>any(),
             any(Pageable.class))).thenReturn(page);
         when(mapper.toPageResponse(page)).thenReturn(pageResponse);
 
-        AuditPageResponse result = auditService.search(UUID.randomUUID(), AggregateType.INCIDENT,
+        PageResponse<AuditSummaryResponse> result = auditService.search(UUID.randomUUID(), AggregateType.INCIDENT,
             AuditEventType.INCIDENT_CREATED, UUID.randomUUID(), Instant.now().minusSeconds(3600), Instant.now(),
             0, 20);
 
@@ -137,7 +137,7 @@ class AuditServiceImplTest {
     @Test
     void searchWorksWithAllFiltersNull() {
         Page<AuditEvent> page = new PageImpl<>(List.of());
-        AuditPageResponse pageResponse = new AuditPageResponse(List.of(), 0, 20, 0L, 0, true, true);
+        PageResponse<AuditSummaryResponse> pageResponse = new PageResponse<>(List.of(), 0, 20, 0L, 0, true, true);
         when(repository.findAll(org.mockito.ArgumentMatchers.<Specification<AuditEvent>>any(),
             any(Pageable.class))).thenReturn(page);
         when(mapper.toPageResponse(page)).thenReturn(pageResponse);

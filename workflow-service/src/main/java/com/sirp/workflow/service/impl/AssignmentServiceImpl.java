@@ -6,16 +6,14 @@ import com.sirp.workflow.dto.request.AssignWorkflowRequest;
 import com.sirp.workflow.dto.response.WorkflowResponse;
 import com.sirp.workflow.entity.WorkflowEntity;
 import com.sirp.workflow.exception.InvalidWorkflowStateException;
-import com.sirp.workflow.exception.WorkflowNotFoundException;
 import com.sirp.workflow.feign.ResilientIncidentServiceClient;
 import com.sirp.workflow.feign.dto.AssignIncidentRequest;
 import com.sirp.workflow.kafka.producer.WorkflowEventProducer;
 import com.sirp.workflow.mapper.WorkflowMapper;
 import com.sirp.workflow.repository.WorkflowRepository;
 import com.sirp.workflow.service.AssignmentService;
+import com.sirp.workflow.util.WorkflowLookup;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +35,14 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public WorkflowResponse assignWorkflow(UUID workflowId, AssignWorkflowRequest request, UUID actorId) {
-        WorkflowEntity entity = findOrThrow(workflowId);
+        WorkflowEntity entity = WorkflowLookup.findOrThrow(repository, workflowId);
         assertNotTerminal(entity);
         return doAssign(entity, request, actorId);
     }
 
     @Override
     public WorkflowResponse reassignWorkflow(UUID workflowId, AssignWorkflowRequest request, UUID actorId) {
-        WorkflowEntity entity = findOrThrow(workflowId);
+        WorkflowEntity entity = WorkflowLookup.findOrThrow(repository, workflowId);
         assertNotTerminal(entity);
         if (entity.getAssignedTo() == null) {
             throw new InvalidWorkflowStateException(
@@ -65,7 +63,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         producer.publishWorkflowAssigned(new WorkflowAssignedEvent(UUID.randomUUID(), saved.getId(),
                                                                     saved.getIncidentId(), saved.getAssignedTo(),
                                                                     saved.getAssignedTeam(), actorId,
-                                                                    toLocalDateTime(Instant.now())));
+                                                                    WorkflowLookup.toLocalDateTime(Instant.now())));
 
         return mapper.toResponse(saved);
     }
@@ -77,12 +75,4 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
     }
 
-    private WorkflowEntity findOrThrow(UUID workflowId) {
-        return repository.findById(workflowId)
-                         .orElseThrow(() -> new WorkflowNotFoundException("Workflow not found: " + workflowId));
-    }
-
-    private LocalDateTime toLocalDateTime(Instant instant) {
-        return instant == null ? null : LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
-    }
 }

@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.sirp.common.dto.PageResponse;
 import com.sirp.notification.exception.GlobalExceptionHandler;
 import com.sirp.notification.exception.NotificationNotFoundException;
-import com.sirp.notification.notification.dto.response.NotificationPageResponse;
 import com.sirp.notification.notification.dto.response.NotificationResponse;
 import com.sirp.notification.notification.enums.NotificationChannel;
 import com.sirp.notification.notification.enums.NotificationStatus;
@@ -70,7 +70,7 @@ class NotificationControllerTest {
     @Test
     void search_defaultsPageAndSizeWhenOmitted() throws Exception {
         when(notificationService.searchNotifications(eq(0), eq(10), any()))
-            .thenReturn(new NotificationPageResponse(List.of(sampleResponse(UUID.randomUUID())), 0, 10, 1, 1,
+            .thenReturn(new PageResponse<>(List.of(sampleResponse(UUID.randomUUID())), 0, 10, 1, 1,
                 true, true));
 
         mockMvc.perform(get("/api/v1/notifications"))
@@ -81,7 +81,7 @@ class NotificationControllerTest {
     @Test
     void search_honorsExplicitPageAndSize() throws Exception {
         when(notificationService.searchNotifications(eq(1), eq(5), any()))
-            .thenReturn(new NotificationPageResponse(List.of(), 1, 5, 0, 0, false, true));
+            .thenReturn(new PageResponse<>(List.of(), 1, 5, 0, 0, false, true));
 
         mockMvc.perform(get("/api/v1/notifications").param("page", "1").param("size", "5"))
             .andExpect(status().isOk())

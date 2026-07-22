@@ -1,5 +1,6 @@
 package com.sirp.incident.incident.service.impl;
 
+import com.sirp.common.dto.PageResponse;
 import com.sirp.common.enums.IncidentPriority;
 import com.sirp.common.enums.IncidentSeverity;
 import com.sirp.common.events.IncidentAssignedEvent;
@@ -16,7 +17,6 @@ import com.sirp.incident.incident.dto.request.UpdateIncidentRequest;
 import com.sirp.incident.incident.dto.response.AttachmentFile;
 import com.sirp.incident.incident.dto.response.AttachmentResponse;
 import com.sirp.incident.incident.dto.response.CommentResponse;
-import com.sirp.incident.incident.dto.response.IncidentPageResponse;
 import com.sirp.incident.incident.dto.response.IncidentResponse;
 import com.sirp.incident.incident.dto.response.IncidentSummaryResponse;
 import com.sirp.incident.incident.entity.Incident;
@@ -114,7 +114,7 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     @Transactional(readOnly = true)
-    public IncidentPageResponse searchIncidents(Integer page,
+    public PageResponse<IncidentSummaryResponse> searchIncidents(Integer page,
         Integer size,
         String status,
         String severity,
@@ -129,9 +129,9 @@ public class IncidentServiceImpl implements IncidentService {
                                                                         incidentPriority));
         Page<Incident> incidents = incidentRepository.findAll(specification, pageable);
         List<IncidentSummaryResponse> content = incidents.stream().map(incidentMapper::toSummary).toList();
-        return new IncidentPageResponse(content, incidents.getNumber(), incidents.getSize(),
-                                        incidents.getTotalElements(), incidents.getTotalPages(), incidents.isFirst(),
-                                        incidents.isLast());
+        return new PageResponse<>(content, incidents.getNumber(), incidents.getSize(),
+                                  incidents.getTotalElements(), incidents.getTotalPages(), incidents.isFirst(),
+                                  incidents.isLast());
     }
 
     @Override

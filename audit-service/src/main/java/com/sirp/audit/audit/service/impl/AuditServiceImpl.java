@@ -1,7 +1,7 @@
 package com.sirp.audit.audit.service.impl;
 
-import com.sirp.audit.audit.dto.response.AuditPageResponse;
 import com.sirp.audit.audit.dto.response.AuditResponse;
+import com.sirp.audit.audit.dto.response.AuditSummaryResponse;
 import com.sirp.audit.audit.entity.AggregateType;
 import com.sirp.audit.audit.entity.AuditEvent;
 import com.sirp.audit.audit.entity.AuditEventType;
@@ -10,6 +10,7 @@ import com.sirp.audit.audit.mapper.AuditMapper;
 import com.sirp.audit.audit.repository.AuditEventRepository;
 import com.sirp.audit.audit.service.AuditService;
 import com.sirp.audit.audit.specification.AuditSpecification;
+import com.sirp.common.dto.PageResponse;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class AuditServiceImpl implements AuditService {
   }
 
   @Override
-  public AuditPageResponse getByAggregateId(
+  public PageResponse<AuditSummaryResponse> getByAggregateId(
 
       UUID aggregateId,
 
@@ -81,7 +82,7 @@ public class AuditServiceImpl implements AuditService {
   }
 
   @Override
-  public AuditPageResponse getByPerformedBy(
+  public PageResponse<AuditSummaryResponse> getByPerformedBy(
 
       UUID performedBy,
 
@@ -116,7 +117,7 @@ public class AuditServiceImpl implements AuditService {
   }
 
   @Override
-  public AuditPageResponse getByEventType(
+  public PageResponse<AuditSummaryResponse> getByEventType(
 
       AuditEventType eventType,
 
@@ -151,7 +152,7 @@ public class AuditServiceImpl implements AuditService {
   }
 
   @Override
-  public AuditPageResponse search(
+  public PageResponse<AuditSummaryResponse> search(
 
       UUID aggregateId,
 

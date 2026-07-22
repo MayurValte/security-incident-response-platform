@@ -5,11 +5,12 @@ import com.sirp.incident.incident.dto.request.AssignIncidentRequest;
 import com.sirp.incident.incident.dto.request.CreateIncidentRequest;
 import com.sirp.incident.incident.dto.request.ResolveIncidentRequest;
 import com.sirp.incident.incident.dto.request.UpdateIncidentRequest;
+import com.sirp.common.dto.PageResponse;
 import com.sirp.incident.incident.dto.response.AttachmentFile;
 import com.sirp.incident.incident.dto.response.AttachmentResponse;
 import com.sirp.incident.incident.dto.response.CommentResponse;
-import com.sirp.incident.incident.dto.response.IncidentPageResponse;
 import com.sirp.incident.incident.dto.response.IncidentResponse;
+import com.sirp.incident.incident.dto.response.IncidentSummaryResponse;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +21,8 @@ public interface IncidentService {
 
     IncidentResponse getIncident(UUID id);
 
-    IncidentPageResponse searchIncidents(Integer page, Integer size, String status, String severity, String priority);
+    PageResponse<IncidentSummaryResponse> searchIncidents(Integer page, Integer size, String status,
+        String severity, String priority);
 
     IncidentResponse updateIncident(UUID id, UpdateIncidentRequest request);
 

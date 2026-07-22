@@ -9,11 +9,9 @@ import com.sirp.workflow.kafka.producer.WorkflowEventProducer;
 import com.sirp.workflow.mapper.WorkflowMapper;
 import com.sirp.workflow.repository.WorkflowRepository;
 import com.sirp.workflow.service.WorkflowService;
+import com.sirp.workflow.util.WorkflowLookup;
 import com.sirp.common.enums.WorkflowStatus;
 import com.sirp.common.events.workflow.WorkflowCreatedEvent;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -49,9 +47,10 @@ public class WorkflowServiceImpl implements WorkflowService {
                                                                  saved.getIncidentId(), saved.getAssignedTo(),
                                                                  saved.getAssignedTeam(), actorId, saved.getSeverity(),
                                                                  saved.getEscalationLevel(),
-                                                                 toLocalDateTime(saved.getSlaDeadline()),
-                                                                 toLocalDateTime(saved.getNextEscalationTime()),
-                                                                 toLocalDateTime(saved.getCreatedAt())));
+                                                                 WorkflowLookup.toLocalDateTime(saved.getSlaDeadline()),
+                                                                 WorkflowLookup.toLocalDateTime(
+                                                                     saved.getNextEscalationTime()),
+                                                                 WorkflowLookup.toLocalDateTime(saved.getCreatedAt())));
 
         return mapper.toResponse(saved);
     }
@@ -59,7 +58,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     @Transactional(readOnly = true)
     public WorkflowResponse getWorkflowById(UUID workflowId) {
-        return mapper.toResponse(findOrThrow(workflowId));
+        return mapper.toResponse(WorkflowLookup.findOrThrow(repository, workflowId));
     }
 
     @Override
@@ -91,16 +90,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public void deleteWorkflow(UUID workflowId) {
-        WorkflowEntity entity = findOrThrow(workflowId);
+        WorkflowEntity entity = WorkflowLookup.findOrThrow(repository, workflowId);
         repository.delete(entity);
-    }
-
-    private WorkflowEntity findOrThrow(UUID workflowId) {
-        return repository.findById(workflowId)
-                         .orElseThrow(() -> new WorkflowNotFoundException("Workflow not found: " + workflowId));
-    }
-
-    private LocalDateTime toLocalDateTime(Instant instant) {
-        return instant == null ? null : LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
     }
 }

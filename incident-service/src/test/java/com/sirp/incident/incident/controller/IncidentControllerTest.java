@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sirp.common.dto.PageResponse;
 import com.sirp.common.enums.IncidentPriority;
 import com.sirp.common.enums.IncidentSeverity;
 import com.sirp.incident.exception.GlobalExceptionHandler;
@@ -24,7 +25,6 @@ import com.sirp.incident.incident.dto.request.ResolveIncidentRequest;
 import com.sirp.incident.incident.dto.request.UpdateIncidentRequest;
 import com.sirp.incident.incident.dto.response.AttachmentResponse;
 import com.sirp.incident.incident.dto.response.CommentResponse;
-import com.sirp.incident.incident.dto.response.IncidentPageResponse;
 import com.sirp.incident.incident.dto.response.IncidentResponse;
 import com.sirp.incident.incident.dto.response.IncidentSummaryResponse;
 import com.sirp.incident.incident.enums.IncidentStatus;
@@ -133,7 +133,7 @@ class IncidentControllerTest {
         IncidentSummaryResponse summary = new IncidentSummaryResponse(UUID.randomUUID(), "INC-2026-ABCD1234",
             "Prod outage", IncidentStatus.OPEN, IncidentSeverity.HIGH, IncidentPriority.P1, null, Instant.now());
         when(incidentService.searchIncidents(0, 20, null, null, null))
-            .thenReturn(new IncidentPageResponse(List.of(summary), 0, 20, 1, 1, true, true));
+            .thenReturn(new PageResponse<>(List.of(summary), 0, 20, 1, 1, true, true));
 
         mockMvc.perform(get("/api/v1/incidents"))
             .andExpect(status().isOk())

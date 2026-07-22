@@ -6,14 +6,12 @@ import com.sirp.workflow.dto.request.EscalateWorkflowRequest;
 import com.sirp.workflow.dto.response.WorkflowResponse;
 import com.sirp.workflow.entity.WorkflowEntity;
 import com.sirp.workflow.exception.InvalidWorkflowStateException;
-import com.sirp.workflow.exception.WorkflowNotFoundException;
 import com.sirp.workflow.kafka.producer.WorkflowEventProducer;
 import com.sirp.workflow.mapper.WorkflowMapper;
 import com.sirp.workflow.repository.WorkflowRepository;
 import com.sirp.workflow.service.EscalationService;
+import com.sirp.workflow.util.WorkflowLookup;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -43,9 +41,7 @@ public class EscalationServiceImpl implements EscalationService {
 
     @Override
     public WorkflowResponse escalateWorkflow(UUID workflowId, EscalateWorkflowRequest request, UUID actorId) {
-        WorkflowEntity entity = repository.findById(workflowId)
-                                          .orElseThrow(() -> new WorkflowNotFoundException(
-                                              "Workflow not found: " + workflowId));
+        WorkflowEntity entity = WorkflowLookup.findOrThrow(repository, workflowId);
 
         if (TERMINAL_STATUSES.contains(entity.getWorkflowStatus())) {
             throw new InvalidWorkflowStateException(
@@ -90,11 +86,8 @@ public class EscalationServiceImpl implements EscalationService {
                                                                      saved.getIncidentId(),
                                                                      saved.getEscalationLevel(),
                                                                      saved.getAssignedTo(), saved.getAssignedTeam(),
-                                                                     actorId, toLocalDateTime(Instant.now()),
+                                                                     actorId,
+                                                                     WorkflowLookup.toLocalDateTime(Instant.now()),
                                                                      saved.getRemarks()));
-    }
-
-    private LocalDateTime toLocalDateTime(Instant instant) {
-        return instant == null ? null : LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
     }
 }

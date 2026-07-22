@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.sirp.common.dto.PageResponse;
 import com.sirp.notification.exception.NotificationNotFoundException;
 import com.sirp.notification.notification.dto.request.NotificationSearchRequest;
-import com.sirp.notification.notification.dto.response.NotificationPageResponse;
 import com.sirp.notification.notification.dto.response.NotificationResponse;
 import com.sirp.notification.notification.entity.Notification;
 import com.sirp.notification.notification.enums.NotificationChannel;
@@ -85,7 +85,7 @@ class NotificationServiceImplTest {
         NotificationSearchRequest request = new NotificationSearchRequest(null, null, null, null, null, null,
             null);
 
-        NotificationPageResponse result = notificationService.searchNotifications(0, 10, request);
+        PageResponse<NotificationResponse> result = notificationService.searchNotifications(0, 10, request);
 
         assertThat(result.content()).containsExactly(response);
         assertThat(result.totalElements()).isEqualTo(1);
